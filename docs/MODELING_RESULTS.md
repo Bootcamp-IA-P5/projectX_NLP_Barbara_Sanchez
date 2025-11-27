@@ -141,6 +141,7 @@ Se guardaron los siguientes archivos para uso posterior:
 
 
 
+
 **Resumen Ejecutivo:**
 
 Se entrenaron 8 modelos baseline de Machine Learning para la detección de comentarios tóxicos. El modelo **SVM + TF-IDF** fue seleccionado como el mejor, alcanzando un F1-score de 0.6897 y un accuracy del 73%. Aunque todos los modelos presentan overfitting, el modelo seleccionado muestra el mejor balance entre rendimiento y generalización. Se requiere optimización de hiperparámetros y técnicas de regularización para mejorar el modelo antes de su implementación en producción.
