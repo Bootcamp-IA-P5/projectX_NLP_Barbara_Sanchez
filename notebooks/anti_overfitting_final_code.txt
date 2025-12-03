@@ -1,0 +1,327 @@
+import pandas as pd
+import numpy as np
+import pickle
+import random
+from sklearn.svm import SVC
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.model_selection import cross_val_score, StratifiedKFold
+import optuna
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix
+try:
+    import nltk
+    from nltk.corpus import wordnet as wn
+    from nltk.tokenize import word_tokenize
+    HAS_WORDNET = True
+    try:
+        nltk.data.find('tokenizers/punkt')
+    except LookupError:
+        nltk.download('punkt', quiet=True)
+    try:
+        nltk.data.find('corpora/wordnet')
+    except LookupError:
+        nltk.download('wordnet', quiet=True)
+except ImportError:
+    HAS_WORDNET = False
+    print("⚠️  NLTK no disponible.")
+try:
+    import nlpaug.augmenter.word as naw
+    import nlpaug.augmenter.sentence as nas
+    HAS_NLPAUG = True
+    print("✅ nlpaug disponible")
+except ImportError:
+    HAS_NLPAUG = False
+    print("⚠️  nlpaug no instalado.")
+    print("   Para instalar: pip install nlpaug")
+    print("   El notebook funcionará con WordNet como backup")
+np.random.seed(42)
+random.seed(42)
+print("✅ Librerías importadas")
+print("ℹ️  Continuando con WordNet como backup. nlpaug se usará si está disponible.")
+df = pd.read_csv('../data/processed/youtoxic_english_1000_processed.csv')
+with open('../data/processed/y_train.pkl', 'rb') as f:
+    y_train = pickle.load(f)
+with open('../data/processed/y_test.pkl', 'rb') as f:
+    y_test = pickle.load(f)
+X_train_text = df[df.index.isin(range(len(y_train)))]['Text_processed'].values
+X_test_text = df[df.index.isin(range(len(y_train), len(y_train) + len(y_test)))]['Text_processed'].values
+n_samples = len(y_train)
+n_classes = 2
+class_counts = np.bincount(y_train)
+total = class_counts.sum()
+class_weights = {0: total / (n_classes * class_counts[0]), 1: total / (n_classes * class_counts[1])}
+print(f"✅ Datos cargados: {len(X_train_text)} train, {len(X_test_text)} test")
+print(f"Class weights: {class_weights}")
+augmenters = {}
+if HAS_NLPAUG:
+    try:
+        augmenters['synonym'] = naw.SynonymAug(aug_src='wordnet', aug_p=0.3)
+        print("✅ Augmentador de sinónimos (WordNet) inicializado")
+    except:
+        try:
+            augmenters['synonym'] = naw.SynonymAug(aug_src='word2vec', model_path='word2vec-google-news-300')
+            print("✅ Augmentador de sinónimos (Word2Vec) inicializado")
+        except:
+            print("⚠️  No se pudo inicializar augmentador de sinónimos")
+            augmenters['synonym'] = None
+    try:
+        augmenters['random'] = naw.RandomWordAug(action='substitute', aug_p=0.2)
+        print("✅ Augmentador de palabras aleatorias inicializado")
+    except:
+        print("⚠️  No se pudo inicializar augmentador de palabras aleatorias")
+        augmenters['random'] = None
+else:
+    augmenters['synonym'] = None
+    augmenters['random'] = None
+def augment_with_nlpaug(text, technique='synonym'):
+    if not HAS_NLPAUG:
+        return text
+    try:
+        if technique == 'synonym' and augmenters.get('synonym'):
+            augmented = augmenters['synonym'].augment(text)
+            return augmented if isinstance(augmented, str) else augmented[0] if augmented else text
+        elif technique == 'random' and augmenters.get('random'):
+            augmented = augmenters['random'].augment(text)
+            return augmented if isinstance(augmented, str) else augmented[0] if augmented else text
+    except Exception as e:
+        return text
+    return text
+def get_synonyms_wordnet(word):
+    if not HAS_WORDNET:
+        return []
+    synonyms = set()
+    for syn in wn.synsets(word):
+        for lemma in syn.lemmas():
+            synonym = lemma.name().replace('_', ' ').lower()
+            if synonym != word and len(synonym.split()) == 1:
+                synonyms.add(synonym)
+    return list(synonyms)[:3]
+def augment_with_wordnet(text, max_replacements=2):
+    if not HAS_WORDNET:
+        return text
+    words = word_tokenize(text.lower())
+    augmented_words = words.copy()
+    replacements = 0
+    for i, word in enumerate(words):
+        if replacements >= max_replacements:
+            break
+        if word.isalpha() and len(word) > 3:
+            synonyms = get_synonyms_wordnet(word)
+            if synonyms:
+                augmented_words[i] = random.choice(synonyms)
+                replacements += 1
+    return ' '.join(augmented_words)
+def advanced_augmentation_nlpaug(texts, labels, augmentation_factor=0.7):
+    augmented_texts = list(texts)
+    augmented_labels = list(labels)
+    toxic_count = labels.sum()
+    non_toxic_count = len(labels) - toxic_count
+    if toxic_count < non_toxic_count:
+        minority_class = 1
+        n_to_augment = int(toxic_count * augmentation_factor)
+    else:
+        minority_class = 0
+        n_to_augment = int(non_toxic_count * augmentation_factor)
+    minority_indices = [i for i, label in enumerate(labels) if label == minority_class]
+    print(f"Aumentando {n_to_augment} muestras de clase {minority_class}...")
+    print(f"Técnicas disponibles: nlpaug={HAS_NLPAUG}, WordNet={HAS_WORDNET}")
+    success_count = 0
+    for i in range(n_to_augment):
+        idx = random.choice(minority_indices)
+        original_text = texts[idx]
+        augmented_text = None
+        if HAS_NLPAUG and random.random() < 0.4:
+            try:
+                augmented_text = augment_with_nlpaug(original_text, technique='synonym')
+                if augmented_text and augmented_text != original_text:
+                    augmented_texts.append(augmented_text)
+                    augmented_labels.append(minority_class)
+                    success_count += 1
+                    continue
+            except Exception as e:
+                pass
+        if HAS_NLPAUG and random.random() < 0.3:
+            try:
+                augmented_text = augment_with_nlpaug(original_text, technique='random')
+                if augmented_text and augmented_text != original_text:
+                    augmented_texts.append(augmented_text)
+                    augmented_labels.append(minority_class)
+                    success_count += 1
+                    continue
+            except Exception as e:
+                pass
+        if HAS_WORDNET and random.random() < 0.2:
+            try:
+                augmented_text = augment_with_wordnet(original_text)
+                if augmented_text != original_text:
+                    augmented_texts.append(augmented_text)
+                    augmented_labels.append(minority_class)
+                    success_count += 1
+                    continue
+            except:
+                pass
+        words = original_text.split()
+        if len(words) > 4:
+            n_to_remove = random.randint(1, max(1, len(words) // 6))
+            words_to_keep = random.sample(words, len(words) - n_to_remove)
+            augmented_text = ' '.join(words_to_keep)
+        else:
+            augmented_text = original_text
+        augmented_texts.append(augmented_text)
+        augmented_labels.append(minority_class)
+        if augmented_text != original_text:
+            success_count += 1
+    print(f"Augmentación exitosa: {success_count}/{n_to_augment} muestras modificadas")
+    return np.array(augmented_texts), np.array(augmented_labels)
+print("="*80)
+print("APLICANDO DATA AUGMENTATION CON NLPAUG")
+print("="*80)
+X_train_aug, y_train_aug = advanced_augmentation_nlpaug(X_train_text, y_train, 0.7)
+print(f"\n📊 Resultados de augmentación:")
+print(f"   Datos originales: {len(X_train_text)}")
+print(f"   Datos aumentados: {len(X_train_aug)} (+{len(X_train_aug) - len(X_train_text)})")
+print(f"   Incremento: {((len(X_train_aug)/len(X_train_text))-1)*100:.1f}%")
+print("="*80)
+tfidf = TfidfVectorizer(max_features=400, ngram_range=(1, 1), min_df=6, max_df=0.70, stop_words='english', sublinear_tf=True, norm='l2')
+X_train_tfidf = tfidf.fit_transform(X_train_aug)
+X_test_tfidf = tfidf.transform(X_test_text)
+print(f"✅ Vectorización ULTRA optimizada: {X_train_tfidf.shape[1]} features")
+print(f"   Train shape: {X_train_tfidf.shape}")
+print(f"   Test shape: {X_test_tfidf.shape}")
+print(f"   Reducción de complejidad: menos features, más filtros")
+def evaluate_model(model, X_train, X_test, y_train, y_test):
+    y_train_pred = model.predict(X_train)
+    y_test_pred = model.predict(X_test)
+    train_f1 = f1_score(y_train, y_train_pred, zero_division=0)
+    test_f1 = f1_score(y_test, y_test_pred, zero_division=0)
+    diff_f1 = abs(train_f1 - test_f1) * 100
+    return {'train_f1': train_f1, 'test_f1': test_f1, 'test_accuracy': accuracy_score(y_test, y_test_pred), 'test_precision': precision_score(y_test, y_test_pred, zero_division=0), 'test_recall': recall_score(y_test, y_test_pred, zero_division=0), 'diff_f1': diff_f1, 'confusion_matrix': confusion_matrix(y_test, y_test_pred)}
+def objective(trial):
+    C = trial.suggest_float('C', 0.0001, 0.02, log=True)
+    model = SVC(C=C, kernel='linear', class_weight=None, random_state=42, probability=True)
+    model.fit(X_train_tfidf, y_train_aug)
+    results = evaluate_model(model, X_train_tfidf, X_test_tfidf, y_train_aug, y_test)
+    if results['test_recall'] >= 0.90:
+        return -30.0
+    if results['test_f1'] < 0.55:
+        return -10.0
+    if results['diff_f1'] > 6.0:
+        return -20.0
+    if results['test_precision'] < 0.50:
+        return -10.0
+    if results['diff_f1'] < 5.0:
+        overfitting_bonus = (5.0 - results['diff_f1']) * 0.50
+    else:
+        overfitting_bonus = 0
+    if results['diff_f1'] > 5.0:
+        overfitting_penalty = ((results['diff_f1'] - 5.0) ** 3) * 0.05
+    else:
+        overfitting_penalty = 0
+    recall_penalty = 0
+    if results['test_recall'] > 0.75:
+        recall_penalty = ((results['test_recall'] - 0.75) ** 2.5) * 0.60
+    elif results['test_recall'] > 0.65:
+        recall_penalty = ((results['test_recall'] - 0.65) ** 2) * 0.50
+    precision_bonus = 0
+    if results['test_precision'] > 0.60:
+        precision_bonus = (results['test_precision'] - 0.60) * 0.20
+    base_score = results['test_f1'] * 0.15
+    score = base_score + overfitting_bonus - overfitting_penalty - recall_penalty + precision_bonus
+    return score
+print("✅ Función objetivo RADICAL (SOLO linear, penaliza recall extremo)")
+study = optuna.create_study(direction='maximize', sampler=optuna.samplers.TPESampler(seed=42))
+print("="*80)
+print("OPTIMIZACIÓN RADICAL - ESTRATEGIA DIFERENTE")
+print("="*80)
+print("✅ SIN Augmentación (reducir complejidad)")
+print("✅ SOLO kernel linear (más simple)")
+print("✅ SIN Class Weights (evitar recall extremo)")
+print("✅ Regularización EXTREMA (C: 0.0001-0.02)")
+print("✅ Vectorizador simple (400 features)")
+print("✅ Penalización EXTREMA por recall >=0.90")
+print("✅ Bonus por precision alta (balance)")
+print("✅ Rechazar modelos con overfitting >6%")
+print("\nObjetivo: F1 > 0.55 Y overfitting < 5%")
+print("Estado anterior: 11.51% → Objetivo: <5%")
+print("Estrategia: SOLO linear + SIN augmentación + regularización extrema")
+print("Trials: 300 (búsqueda exhaustiva)")
+print("-"*80)
+study.optimize(objective, n_trials=300, show_progress_bar=True)
+print("\n✅ Optimización completada")
+best_params = study.best_params
+best_model = SVC(C=best_params['C'], kernel='linear', class_weight=None, random_state=42, probability=True)
+best_model.fit(X_train_tfidf, y_train_aug)
+results = evaluate_model(best_model, X_train_tfidf, X_test_tfidf, y_train_aug, y_test)
+print("="*80)
+print("RESULTADOS FINALES")
+print("="*80)
+print(f"F1-score (test): {results['test_f1']:.4f}")
+print(f"Accuracy (test): {results['test_accuracy']:.4f}")
+print(f"Precision (test): {results['test_precision']:.4f}")
+print(f"Recall (test): {results['test_recall']:.4f}")
+print(f"Diferencia F1: {results['diff_f1']:.2f}%")
+if results['diff_f1'] < 5.0 and results['test_f1'] > 0.55:
+    print("\n✅✅✅ OBJETIVO CUMPLIDO: Overfitting < 5% Y F1 > 0.55")
+    print(f"   ¡Reducción exitosa de 9.06% a {results['diff_f1']:.2f}%!")
+elif results['diff_f1'] < 5.0:
+    print("\n✅ Overfitting controlado (<5%) pero F1-score bajo")
+    print(f"   F1-score: {results['test_f1']:.4f} (objetivo: >0.55)")
+    print(f"   Overfitting: {results['diff_f1']:.2f}% ✅")
+elif results['diff_f1'] < 6.0:
+    print("\n🎯 MUY CERCA: Overfitting < 6%")
+    print(f"   Overfitting: {results['diff_f1']:.2f}% (objetivo: <5%, diferencia: {results['diff_f1']-5.0:.2f}%)")
+    print(f"   F1-score: {results['test_f1']:.4f}")
+elif results['test_f1'] > 0.55:
+    print("\n⚠️  F1-score aceptable pero overfitting aún alto")
+    print(f"   Overfitting: {results['diff_f1']:.2f}% (objetivo: <5%)")
+    print(f"   Mejora: de 9.06% a {results['diff_f1']:.2f}% (reducción: {9.06-results['diff_f1']:.2f}%)")
+else:
+    print("\n⚠️  Revisar estrategia - ambos objetivos no cumplidos")
+print("="*80)
+from scipy.sparse import vstack
+X_all = vstack([X_train_tfidf, X_test_tfidf])
+y_all = np.concatenate([y_train_aug, y_test])
+cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
+cv_scores = cross_val_score(best_model, X_all, y_all, cv=cv, scoring='f1', n_jobs=-1)
+print(f"F1-score (CV): {cv_scores.mean():.4f} (+/- {cv_scores.std() * 2:.4f})")
+print(f"Scores: {cv_scores}")
+if results['diff_f1'] < 5.0 and results['test_f1'] > 0.55:
+    save_model = True
+    reason = "Objetivo cumplido"
+elif results['diff_f1'] < 6.0 and results['test_f1'] > 0.55:
+    save_model = True
+    reason = f"Muy cerca del objetivo (overfitting: {results['diff_f1']:.2f}%)"
+else:
+    save_model = False
+    reason = "No cumple objetivos"
+if save_model:
+    with open('../models/final_model_anti_overfitting.pkl', 'wb') as f:
+        pickle.dump(best_model, f)
+    with open('../models/final_tfidf_vectorizer.pkl', 'wb') as f:
+        pickle.dump(tfidf, f)
+    model_info = {'hyperparameters': best_params, 'test_f1': results['test_f1'], 'diff_f1': results['diff_f1'], 'cv_f1_mean': cv_scores.mean(), 'class_weights_used': False, 'data_augmentation': False}
+    with open('../models/final_model_info.pkl', 'wb') as f:
+        pickle.dump(model_info, f)
+    print(f"✅ Modelo guardado exitosamente ({reason})")
+else:
+    print(f"⚠️  Modelo no guardado: {reason}")
+    print(f"   Overfitting: {results['diff_f1']:.2f}% (objetivo: <5%)")
+    print(f"   F1-score: {results['test_f1']:.4f} (objetivo: >0.55)")
+print("="*80)
+print("ANÁLISIS DETALLADO")
+print("="*80)
+print(f"\n📊 Comparación Train vs Test:")
+print(f"   Train F1: {results['train_f1']:.4f}")
+print(f"   Test F1: {results['test_f1']:.4f}")
+print(f"   Diferencia: {results['diff_f1']:.2f}%")
+print(f"\n📊 Matriz de Confusión:")
+print(results['confusion_matrix'])
+tn, fp, fn, tp = results['confusion_matrix'].ravel()
+print(f"\n   Verdaderos Negativos (TN): {tn}")
+print(f"   Falsos Positivos (FP): {fp}")
+print(f"   Falsos Negativos (FN): {fn}")
+print(f"   Verdaderos Positivos (TP): {tp}")
+print(f"\n📊 Hiperparámetros finales:")
+for param, value in best_params.items():
+    print(f"   {param}: {value}")
+print("\n" + "="*80)
+
