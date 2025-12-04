@@ -60,7 +60,11 @@ class TextVectorizer:
         Returns:
             Matriz de características
         """
-        return self.vectorizer.fit_transform(texts).toarray()
+        # Limpiar textos: eliminar NaN y convertir a string
+        texts_clean = texts.fillna('').astype(str)
+        # Reemplazar strings vacíos con un placeholder
+        texts_clean = texts_clean.replace('', 'empty_text')
+        return self.vectorizer.fit_transform(texts_clean).toarray()
     
     def transform(self, texts: pd.Series) -> np.ndarray:
         """
@@ -72,7 +76,11 @@ class TextVectorizer:
         Returns:
             Matriz de características
         """
-        return self.vectorizer.transform(texts).toarray()
+        # Limpiar textos: eliminar NaN y convertir a string
+        texts_clean = texts.fillna('').astype(str)
+        # Reemplazar strings vacíos con un placeholder
+        texts_clean = texts_clean.replace('', 'empty_text')
+        return self.vectorizer.transform(texts_clean).toarray()
     
     def get_feature_names(self) -> list:
         """
@@ -195,6 +203,18 @@ def vectorize_data(
         Tupla (X_train_vectorized, X_test_vectorized, vectorizer)
     """
     print(f"🔧 Vectorizando con método: {method.upper()}")
+    
+    # Verificar y limpiar datos antes de vectorizar
+    print("   Verificando calidad de los datos...")
+    train_nan = X_train.isna().sum()
+    test_nan = X_test.isna().sum()
+    train_empty = (X_train.fillna('').astype(str) == '').sum()
+    test_empty = (X_test.fillna('').astype(str) == '').sum()
+    
+    if train_nan > 0 or test_nan > 0:
+        print(f"   ⚠️  Encontrados {train_nan} NaN en train y {test_nan} en test")
+    if train_empty > 0 or test_empty > 0:
+        print(f"   ⚠️  Encontrados {train_empty} textos vacíos en train y {test_empty} en test")
     
     # Crear vectorizador
     vectorizer = TextVectorizer(method=method, **vectorizer_params)
