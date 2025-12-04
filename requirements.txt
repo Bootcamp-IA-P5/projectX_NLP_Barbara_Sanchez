@@ -1,0 +1,42 @@
+# Core Data Science
+pandas>=2.0.0
+numpy>=1.24.0
+
+# Machine Learning
+scikit-learn>=1.3.0
+
+# NLP Libraries
+spacy>=3.7.0
+nltk>=3.8.0
+
+# Hyperparameter Optimization
+optuna>=3.4.0
+
+# Transformers (Nivel Experto)
+transformers>=4.35.0
+torch>=2.1.0
+
+# Visualization & App
+streamlit>=1.28.0
+matplotlib>=3.7.0
+seaborn>=0.12.0
+
+# Web Scraping (Nivel Medio - YouTube)
+beautifulsoup4>=4.12.0
+requests>=2.31.0
+youtube-comment-downloader>=3.0.0
+
+# Testing
+pytest>=7.4.0
+pytest-cov>=4.1.0
+
+# Utilities
+tqdm>=4.66.0
+python-dotenv>=1.0.0
+
+# MLFlow (Nivel Experto)
+mlflow>=2.8.0
+
+# Database (Nivel Experto)
+sqlalchemy>=2.0.0
+
