@@ -5,7 +5,7 @@ Este módulo contiene funciones para evaluar el rendimiento
 de modelos de clasificación de texto.
 """
 
-from typing import Dict, Tuple
+from typing import Dict, Tuple, Any
 import numpy as np
 import pandas as pd
 from sklearn.metrics import (
