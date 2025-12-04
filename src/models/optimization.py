@@ -17,6 +17,13 @@ try:
     from .train import train_model
     from .evaluate import evaluate_model
 except ImportError:
+    # Si falla, intentar import absoluto
+    import sys
+    from pathlib import Path
+    # Añadir src al path si no está
+    src_path = Path(__file__).parent.parent
+    if str(src_path) not in sys.path:
+        sys.path.insert(0, str(src_path))
     from models.train import train_model
     from models.evaluate import evaluate_model
 
