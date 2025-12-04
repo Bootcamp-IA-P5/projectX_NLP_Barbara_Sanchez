@@ -95,4 +95,4 @@
 
 ---
 
-**Última actualización**: Optimización de hiperparámetros completada - Objetivos cumplidos ✅
+
