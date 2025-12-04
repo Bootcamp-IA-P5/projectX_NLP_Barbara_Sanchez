@@ -34,26 +34,101 @@
    - `develop`: Rama de desarrollo (lista para trabajar)
    - `backup/old-work-before-fresh-start`: Backup completo
 
-## 📋 Próximos Pasos
+---
 
-### DÍA 2: EDA (Análisis Exploratorio de Datos)
-- [ ] Crear rama `feat/01-eda`
-- [ ] Crear notebook `01_EDA.ipynb`
-- [ ] Cargar y explorar dataset
-- [ ] Análisis de distribución de clases
-- [ ] Análisis de texto (longitud, palabras frecuentes)
-- [ ] Visualizaciones
-- [ ] Documentar en `docs/EDA_RESULTS.md`
+## ✅ DÍA 2: EDA (Análisis Exploratorio de Datos) - COMPLETADO
 
-## 📝 Notas Importantes
+### Tareas realizadas:
 
-- **Dataset**: El archivo `youtoxic_english_1000.csv` debe estar en `data/raw/`
-- **Rama actual**: `develop` (lista para empezar a trabajar)
-- **Backup**: Todo el trabajo anterior está en `backup/old-work-before-fresh-start`
+1. **✅ Notebook de EDA creado** (`01_EDA.ipynb`)
+   - Análisis completo del dataset
+   - Distribución de clases
+   - Análisis de texto (longitud, palabras frecuentes)
+   - Visualizaciones
+   - Ejemplos de comentarios
 
+2. **✅ Dataset cargado y analizado**
+   - Dataset: `youtoxic_english_1000.csv` (1000 comentarios)
+   - Columnas identificadas: Text, IsToxic, IsAbusive, IsHatespeech, etc.
 
+3. **✅ Merge a develop**
+   - Rama `feat/01-eda` mergeada a `develop`
 
 ---
 
+## ✅ DÍA 3: Preprocesamiento - COMPLETADO
 
+### Tareas realizadas:
 
+1. **✅ Pipeline de preprocesamiento implementado**
+   - Módulo: `src/data/preprocessing.py`
+   - Clase `TextPreprocessor` con pipeline completo
+   - Soporte para spaCy (preferido) y NLTK (alternativa)
+
+2. **✅ Funcionalidades del pipeline:**
+   - ✅ Limpieza básica (URLs, emails, caracteres especiales)
+   - ✅ Normalización (contracciones, repeticiones)
+   - ✅ Tokenización (spaCy o NLTK)
+   - ✅ Eliminación de stopwords
+   - ✅ Lematización
+
+3. **✅ Notebook de preprocesamiento creado** (`02_Preprocessing.ipynb`)
+   - Aplicación del pipeline al dataset completo
+   - Comparación texto original vs procesado
+   - Visualizaciones de resultados
+   - Guardado de datos preprocesados
+
+4. **✅ Rama actual:** `feat/02-preprocessing`
+   - Commit realizado: "feat: implement complete text preprocessing pipeline with spaCy and NLTK"
+   - ⚠️ **Pendiente:** Merge a `develop`
+
+---
+
+## 📋 Próximos Pasos
+
+### DÍA 4: Feature Engineering (Vectorización)
+- [ ] Crear rama `feat/03-features`
+- [ ] Implementar TF-IDF Vectorizer
+- [ ] Implementar Count Vectorizer (Bag of Words)
+- [ ] Probar diferentes configuraciones (ngram_range, max_features)
+- [ ] División train/test estratificada
+- [ ] Guardar matrices vectorizadas
+- [ ] Crear módulo `src/features/vectorization.py`
+
+### DÍA 5: Modelado Baseline
+- [ ] Crear rama `feat/04-modeling-baseline`
+- [ ] Entrenar modelos clásicos (Naive Bayes, Logistic Regression, SVM, Random Forest)
+- [ ] Comparar TF-IDF vs Count Vectorizer
+- [ ] Evaluar métricas (F1, Accuracy, Precision, Recall)
+- [ ] Analizar overfitting
+- [ ] Seleccionar mejor modelo baseline
+- [ ] Crear módulos `src/models/train.py` y `evaluate.py`
+
+### DÍA 6: Optimización y Anti-Overfitting
+- [ ] Crear rama `feat/06-anti-overfitting`
+- [ ] Optimización de hiperparámetros con Optuna
+- [ ] Técnicas anti-overfitting
+- [ ] Validación cruzada
+- [ ] Objetivo: Overfitting < 5%
+
+### DÍA 7: Modularización y Productivización
+- [ ] Modularización completa
+- [ ] Aplicación Streamlit
+- [ ] Integración YouTube (Nivel Medio)
+
+### DÍA 8: Pulido Final
+- [ ] Tests unitarios
+- [ ] Documentación completa
+- [ ] Git final
+
+---
+
+## 📝 Notas Importantes
+
+- **Dataset**: `youtoxic_english_1000.csv` en `data/raw/`
+- **Rama actual**: `feat/02-preprocessing`
+- **Backup**: Todo el trabajo anterior está en `backup/old-work-before-fresh-start`
+
+---
+
+**Última actualización**: Día 3 completado - Preprocesamiento implementado
