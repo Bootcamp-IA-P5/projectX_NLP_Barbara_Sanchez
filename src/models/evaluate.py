@@ -110,7 +110,7 @@ def evaluate_model(
 
 def compare_models(
     results_dict: Dict[str, Dict[str, float]],
-    metric: str = 'test_f1'
+    metric: str = 'F1 (test)'
 ) -> pd.DataFrame:
     """
     Comparar resultados de múltiples modelos.
@@ -118,7 +118,7 @@ def compare_models(
     Args:
         results_dict: Diccionario con resultados de modelos
                      {model_name: {metrics_dict}}
-        metric: Métrica principal para comparar (default: 'test_f1')
+        metric: Métrica principal para comparar (default: 'F1 (test)')
         
     Returns:
         DataFrame con comparación
@@ -137,7 +137,17 @@ def compare_models(
         })
     
     df = pd.DataFrame(comparison_data)
-    df = df.sort_values(by=metric, ascending=False)
+    # Mapear nombres de métricas internos a nombres de columnas
+    metric_map = {
+        'test_f1': 'F1 (test)',
+        'train_f1': 'F1 (train)',
+        'diff_f1': 'Overfitting (%)',
+        'test_accuracy': 'Accuracy (test)',
+        'test_precision': 'Precision (test)',
+        'test_recall': 'Recall (test)'
+    }
+    sort_metric = metric_map.get(metric, metric)
+    df = df.sort_values(by=sort_metric, ascending=False)
     
     return df
 
