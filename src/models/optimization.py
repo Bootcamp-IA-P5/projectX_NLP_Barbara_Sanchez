@@ -12,8 +12,13 @@ import pandas as pd
 from sklearn.model_selection import cross_val_score, StratifiedKFold
 from sklearn.metrics import f1_score, make_scorer
 
-from .train import train_model
-from .evaluate import evaluate_model
+# Imports relativos o absolutos según el contexto
+try:
+    from .train import train_model
+    from .evaluate import evaluate_model
+except ImportError:
+    from models.train import train_model
+    from models.evaluate import evaluate_model
 
 
 def objective_svm(
