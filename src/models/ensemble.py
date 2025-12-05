@@ -102,11 +102,9 @@ def create_stacking_classifier(
         model_params = config.get('params', {})
         model_name = config.get('name', model_type)
         
-        # Crear función para entrenar modelo
-        def make_model():
-            return train_model(model_type, X_train, y_train, **model_params)
-        
-        estimators.append((model_name, make_model()))
+        # Entrenar modelo individual
+        model = train_model(model_type, X_train, y_train, **model_params)
+        estimators.append((model_name, model))
     
     # Estimador final por defecto
     if final_estimator is None:
