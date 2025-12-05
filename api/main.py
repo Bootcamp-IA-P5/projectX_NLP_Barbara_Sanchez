@@ -12,10 +12,26 @@ from typing import List, Optional
 import sys
 from pathlib import Path
 
-# Añadir src al path
-sys.path.append(str(Path(__file__).parent.parent / 'src'))
+# Añadir src al path para imports
+project_root = Path(__file__).parent.parent
+src_path = project_root / 'src'
+if str(src_path) not in sys.path:
+    sys.path.insert(0, str(src_path))
 
-from api.predict import load_predictor, HateSpeechPredictor
+# Importar módulo de predicción (desde src/api/predict.py)
+try:
+    from api.predict import load_predictor, HateSpeechPredictor
+except ImportError as e:
+    # Si falla, intentar import directo
+    import importlib.util
+    spec = importlib.util.spec_from_file_location(
+        "api.predict", 
+        src_path / "api" / "predict.py"
+    )
+    predict_module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(predict_module)
+    load_predictor = predict_module.load_predictor
+    HateSpeechPredictor = predict_module.HateSpeechPredictor
 
 # Inicializar FastAPI
 app = FastAPI(
