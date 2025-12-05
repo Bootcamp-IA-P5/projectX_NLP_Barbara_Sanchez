@@ -23,6 +23,7 @@ echo "📡 Iniciando servidor en http://localhost:8000"
 echo "📚 Documentación disponible en http://localhost:8000/docs"
 echo ""
 
-# Ejecutar API
+# Ejecutar API con PYTHONPATH configurado
+export PYTHONPATH="${PYTHONPATH}:$(pwd)/src"
 uvicorn api.main:app --reload --host 0.0.0.0 --port 8000
 
