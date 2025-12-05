@@ -30,7 +30,8 @@ def create_voting_classifier(
     X_train: np.ndarray,
     y_train: pd.Series,
     voting: str = 'soft',
-    weights: Optional[List[float]] = None
+    weights: Optional[List[float]] = None,
+    use_optimized_params: bool = True
 ) -> VotingClassifier:
     """
     Crear ensemble con Voting Classifier.
@@ -42,19 +43,36 @@ def create_voting_classifier(
         y_train: Etiquetas de entrenamiento
         voting: Tipo de votación ('hard' o 'soft', default: 'soft')
         weights: Pesos para cada modelo (opcional)
+        use_optimized_params: Si True, usa parámetros optimizados para reducir overfitting
         
     Returns:
         VotingClassifier entrenado
     """
     estimators = []
     
+    # Parámetros optimizados para reducir overfitting
+    optimized_params = {
+        'svm': {'C': 0.056, 'kernel': 'linear', 'class_weight': 'balanced'},
+        'logistic': {'C': 0.1, 'penalty': 'l2', 'class_weight': 'balanced', 'max_iter': 1000},
+        'naive_bayes': {'alpha': 10.0},  # Mayor regularización
+        'random_forest': {'n_estimators': 50, 'max_depth': 5, 'min_samples_split': 10, 
+                         'min_samples_leaf': 5, 'class_weight': 'balanced'}
+    }
+    
     for config in models_config:
         model_type = config['type']
         model_params = config.get('params', {})
         model_name = config.get('name', model_type)
         
+        # Usar parámetros optimizados si está habilitado
+        if use_optimized_params and model_type in optimized_params:
+            # Combinar parámetros: los del config tienen prioridad
+            final_params = {**optimized_params[model_type], **model_params}
+        else:
+            final_params = model_params
+        
         # Entrenar modelo individual
-        model = train_model(model_type, X_train, y_train, **model_params)
+        model = train_model(model_type, X_train, y_train, **final_params)
         estimators.append((model_name, model))
     
     # Crear Voting Classifier
@@ -80,7 +98,8 @@ def create_stacking_classifier(
     X_train: np.ndarray,
     y_train: pd.Series,
     final_estimator: Any = None,
-    cv: int = 5
+    cv: int = 5,
+    use_optimized_params: bool = True
 ) -> StackingClassifier:
     """
     Crear ensemble con Stacking Classifier.
@@ -91,25 +110,42 @@ def create_stacking_classifier(
         y_train: Etiquetas de entrenamiento
         final_estimator: Estimador final (default: LogisticRegression)
         cv: Número de folds para cross-validation (default: 5)
+        use_optimized_params: Si True, usa parámetros optimizados para reducir overfitting
         
     Returns:
         StackingClassifier entrenado
     """
     estimators = []
     
+    # Parámetros optimizados para reducir overfitting
+    optimized_params = {
+        'svm': {'C': 0.056, 'kernel': 'linear', 'class_weight': 'balanced'},
+        'logistic': {'C': 0.1, 'penalty': 'l2', 'class_weight': 'balanced', 'max_iter': 1000},
+        'naive_bayes': {'alpha': 10.0},  # Mayor regularización
+        'random_forest': {'n_estimators': 50, 'max_depth': 5, 'min_samples_split': 10, 
+                         'min_samples_leaf': 5, 'class_weight': 'balanced'}
+    }
+    
     for config in models_config:
         model_type = config['type']
         model_params = config.get('params', {})
         model_name = config.get('name', model_type)
         
+        # Usar parámetros optimizados si está habilitado
+        if use_optimized_params and model_type in optimized_params:
+            # Combinar parámetros: los del config tienen prioridad
+            final_params = {**optimized_params[model_type], **model_params}
+        else:
+            final_params = model_params
+        
         # Entrenar modelo individual
-        model = train_model(model_type, X_train, y_train, **model_params)
+        model = train_model(model_type, X_train, y_train, **final_params)
         estimators.append((model_name, model))
     
-    # Estimador final por defecto
+    # Estimador final por defecto (con regularización)
     if final_estimator is None:
         final_estimator = LogisticRegression(
-            C=1.0,
+            C=0.1,  # Mayor regularización
             max_iter=1000,
             class_weight='balanced',
             random_state=42
