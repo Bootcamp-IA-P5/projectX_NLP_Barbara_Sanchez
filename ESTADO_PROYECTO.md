@@ -12,7 +12,7 @@
 
 ### 🟡 Nivel Medio:
 - ✅ **Optimización con Optuna**: Completado
-- ⚠️ **Ensemble de modelos**: Pendiente
+- ✅ **Ensemble de modelos**: Implementado y evaluado (no mejora vs SVM individual, se usa SVM)
 - ⚠️ **Integración YouTube (URL)**: Pendiente
 - ⚠️ **Tests unitarios**: Pendiente
 
@@ -38,12 +38,14 @@
    - Guía de instalación y uso
    - **Rama**: `feat/10-documentation`
 
-### 2. **Ensemble de Modelos** - Nivel Medio
-   - Implementar ensemble (Voting, Stacking)
-   - Combinar mejores modelos del baseline
-   - Evaluar resultados
-   - Comparar con modelo individual
-   - **Rama**: `feat/07-ensemble`
+### 2. **Ensemble de Modelos** - Nivel Medio ✅ COMPLETADO
+   - ✅ Implementar ensemble (Voting, Stacking)
+   - ✅ Combinar mejores modelos del baseline
+   - ✅ Evaluar resultados
+   - ✅ Comparar con modelo individual
+   - **Resultado**: Ensemble no mejora vs SVM optimizado individual
+   - **Decisión**: Usar SVM optimizado (F1: 0.6866, Overfitting: 2.54%)
+   - **Rama**: `feat/07-ensemble` ✅
 
 ### 3. **Integración YouTube** - Nivel Medio
    - Función para extraer comentarios de URL de video
