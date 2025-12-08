@@ -17,10 +17,10 @@
 - ✅ **Integración YouTube (URL)**: Completado - extracción y análisis de comentarios
 
 ### 🟠 Nivel Avanzado:
+- ✅ **Dockerización**: Completado - Dockerfile, docker-compose.yml, documentación
 - ⚠️ **RNN/LSTM**: Pendiente
 - ⚠️ **Seguimiento tiempo real**: Pendiente
 - ⚠️ **Despliegue público**: Pendiente
-- ⚠️ **Dockerización**: Pendiente
 
 ### 🔴 Nivel Experto:
 - ✅ **Transformers (DistilBERT)**: Implementado y funcionando (F1: 0.7027, Overfitting: 24.41%)
@@ -77,10 +77,23 @@
    - **Decisión**: DistilBERT cumple nivel experto, SVM optimizado se usa en producción
    - **Rama**: `feat/11-transformers` ✅
 
-### 6. **Base de Datos y MLFlow** - Nivel Experto
+### 6. **Dockerización** - Nivel Avanzado ✅ COMPLETADO
+   - ✅ Dockerfile creado para la API
+   - ✅ docker-compose.yml configurado
+   - ✅ .dockerignore para optimizar build
+   - ✅ Documentación completa en docs/DOCKER.md
+   - ✅ API funcionando en contenedor Docker
+   - **Rama**: `feat/14-docker` ✅
+
+### 7. **Base de Datos y MLFlow** - Nivel Experto
    - Guardar predicciones en BD
    - Tracking con MLFlow
    - **Rama**: `feat/12-database-mlflow`
+
+### 8. **Despliegue Público** - Nivel Avanzado
+   - Desplegar API en servidor público (Heroku, AWS, Railway, etc.)
+   - Configurar dominio
+   - **Rama**: `feat/15-deployment`
 
 ---
 
