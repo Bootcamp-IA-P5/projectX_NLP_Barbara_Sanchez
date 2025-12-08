@@ -79,8 +79,13 @@ class MLFlowTracker:
             mlflow.log_param("model_type", model_name)
             
             # Convertir métricas a float (por si son arrays de numpy)
+            # Excluir confusion_matrix ya que es un array 2D
             metrics_float = {}
             for key, value in metrics.items():
+                # Saltar confusion_matrix y otros arrays multidimensionales
+                if key == 'confusion_matrix':
+                    continue
+                    
                 if isinstance(value, (np.ndarray, np.generic)):
                     # Si es array, tomar el primer elemento o convertir a float
                     if value.size == 1:
@@ -89,7 +94,11 @@ class MLFlowTracker:
                         # Si tiene múltiples elementos, tomar la media o el primero
                         metrics_float[key] = float(value[0]) if len(value) > 0 else 0.0
                 else:
-                    metrics_float[key] = float(value)
+                    try:
+                        metrics_float[key] = float(value)
+                    except (ValueError, TypeError):
+                        # Si no se puede convertir, saltar esta métrica
+                        continue
             
             # Logear métricas
             mlflow.log_metrics(metrics_float)
