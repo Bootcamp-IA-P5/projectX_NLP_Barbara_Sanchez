@@ -70,14 +70,29 @@ class MLFlowTracker:
             vectorizer_type: Tipo de vectorizador usado
             tags: Tags adicionales
         """
+        import numpy as np
+        
         with mlflow.start_run(run_name=model_name):
             # Logear parámetros
             mlflow.log_params(params)
             mlflow.log_param("vectorizer_type", vectorizer_type)
             mlflow.log_param("model_type", model_name)
             
+            # Convertir métricas a float (por si son arrays de numpy)
+            metrics_float = {}
+            for key, value in metrics.items():
+                if isinstance(value, (np.ndarray, np.generic)):
+                    # Si es array, tomar el primer elemento o convertir a float
+                    if value.size == 1:
+                        metrics_float[key] = float(value.item())
+                    else:
+                        # Si tiene múltiples elementos, tomar la media o el primero
+                        metrics_float[key] = float(value[0]) if len(value) > 0 else 0.0
+                else:
+                    metrics_float[key] = float(value)
+            
             # Logear métricas
-            mlflow.log_metrics(metrics)
+            mlflow.log_metrics(metrics_float)
             
             # Logear modelo
             mlflow.sklearn.log_model(
