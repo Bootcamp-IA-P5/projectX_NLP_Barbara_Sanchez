@@ -81,35 +81,48 @@ class MLFlowTracker:
             # Convertir métricas a float (por si son arrays de numpy)
             # Excluir confusion_matrix ya que es un array 2D
             metrics_float = {}
+            skipped_metrics = []
+            
             for key, value in metrics.items():
                 # Saltar confusion_matrix y otros arrays multidimensionales
                 if key == 'confusion_matrix':
+                    skipped_metrics.append(f"{key} (array 2D)")
                     continue
                 
                 # Convertir a float de forma segura
                 try:
+                    # Primero, convertir cualquier tipo de numpy a Python nativo
                     if isinstance(value, np.ndarray):
                         # Si es array, verificar tamaño
                         if value.ndim > 1:
                             # Array multidimensional, saltar
+                            skipped_metrics.append(f"{key} (array {value.ndim}D, shape {value.shape})")
                             continue
                         elif value.size == 1:
                             metrics_float[key] = float(value.item())
                         elif value.size == 0:
+                            skipped_metrics.append(f"{key} (array vacío)")
                             continue
                         else:
                             # Array 1D con múltiples elementos, tomar el primero
                             metrics_float[key] = float(value.flat[0])
                     elif isinstance(value, np.generic):
-                        # Escalar numpy
+                        # Escalar numpy (np.float64, np.int64, etc.)
                         metrics_float[key] = float(value.item())
+                    elif isinstance(value, (int, float)):
+                        # Python nativo
+                        metrics_float[key] = float(value)
                     else:
-                        # Python nativo, convertir a float
+                        # Otro tipo, intentar convertir
                         metrics_float[key] = float(value)
                 except (ValueError, TypeError, AttributeError) as e:
                     # Si no se puede convertir, saltar esta métrica
-                    print(f"⚠️  Saltando métrica '{key}': {type(value).__name__} - {e}")
+                    skipped_metrics.append(f"{key} ({type(value).__name__}: {str(e)[:50]})")
                     continue
+            
+            # Mostrar métricas saltadas si las hay
+            if skipped_metrics:
+                print(f"⚠️  Métricas saltadas: {', '.join(skipped_metrics)}")
             
             # Verificar que tenemos métricas antes de logear
             if not metrics_float:
