@@ -72,7 +72,7 @@ class TextRequest(BaseModel):
     text: str = Field(..., description="Texto a analizar", min_length=1, max_length=5000)
     
     class Config:
-        schema_extra = {
+        json_schema_extra = {
             "example": {
                 "text": "This video is amazing! Great content!"
             }
@@ -84,7 +84,7 @@ class BatchTextRequest(BaseModel):
     texts: List[str] = Field(..., description="Lista de textos a analizar", min_items=1, max_items=100)
     
     class Config:
-        schema_extra = {
+        json_schema_extra = {
             "example": {
                 "texts": [
                     "This video is amazing!",
@@ -104,7 +104,7 @@ class PredictionResponse(BaseModel):
     confidence: float
     
     class Config:
-        schema_extra = {
+        json_schema_extra = {
             "example": {
                 "text": "This video is amazing!",
                 "is_toxic": False,
@@ -129,7 +129,7 @@ class YouTubeVideoRequest(BaseModel):
     sort_by: str = Field("top", description="Orden de comentarios: 'top', 'time', 'relevance'")
     
     class Config:
-        schema_extra = {
+        json_schema_extra = {
             "example": {
                 "video_url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
                 "max_comments": 100,
@@ -163,7 +163,7 @@ class VideoAnalysisResponse(BaseModel):
     comments: List[CommentAnalysis]
     
     class Config:
-        schema_extra = {
+        json_schema_extra = {
             "example": {
                 "video_id": "dQw4w9WgXcQ",
                 "video_url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
