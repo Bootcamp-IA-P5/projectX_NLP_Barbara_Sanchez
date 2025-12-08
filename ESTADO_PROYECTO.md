@@ -23,7 +23,10 @@
 - ⚠️ **Dockerización**: Pendiente
 
 ### 🔴 Nivel Experto:
-- ⚠️ **Transformers (DistilBERT)**: Notebook existe en backup, no implementado en flujo principal
+- ✅ **Transformers (DistilBERT)**: Implementado y funcionando (F1: 0.7027, Overfitting: 24.41%)
+  - Módulo `src/models/transformers.py` creado
+  - Notebooks de entrenamiento y comparación
+  - **Decisión**: DistilBERT cumple nivel experto, pero SVM optimizado se usa en producción (mejor balance)
 - ⚠️ **Base de datos**: Pendiente
 - ⚠️ **MLFlow**: Pendiente
 
@@ -65,10 +68,14 @@
    - **Total**: 46 tests (41 passing, 5 skipped)
    - **Rama**: `feat/09-tests` ✅
 
-### 5. **Transformers (DistilBERT)** - Nivel Experto
-   - Implementar DistilBERT en flujo principal
-   - Comparar con modelos clásicos
-   - **Rama**: `feat/11-transformers`
+### 5. **Transformers (DistilBERT)** - Nivel Experto ✅ COMPLETADO
+   - ✅ Implementar DistilBERT en flujo principal
+   - ✅ Módulo `src/models/transformers.py` con funciones completas
+   - ✅ Notebooks de entrenamiento y comparación
+   - ✅ Comparar con modelos clásicos
+   - **Resultado**: DistilBERT F1=0.7027 (mejor que SVM 0.6866) pero Overfitting=24.41% (vs 2.54% SVM)
+   - **Decisión**: DistilBERT cumple nivel experto, SVM optimizado se usa en producción
+   - **Rama**: `feat/11-transformers` ✅
 
 ### 6. **Base de Datos y MLFlow** - Nivel Experto
    - Guardar predicciones en BD
