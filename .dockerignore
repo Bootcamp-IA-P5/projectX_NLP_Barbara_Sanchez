@@ -1,0 +1,68 @@
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+.venv
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Jupyter Notebooks
+*.ipynb_checkpoints
+notebooks/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Documentación
+docs/
+*.md
+!README.md
+
+# Tests
+tests/
+pytest.ini
+
+# Data (no incluir datos grandes en la imagen)
+data/raw/
+data/processed/*.csv
+data/processed/*.pkl
+
+# Modelos grandes (se pueden copiar después o usar volúmenes)
+# models/transformers/
+
+# Logs
+*.log
+logs/
+
+# Temporal
+tmp/
+temp/
+*.tmp
+
+# Docker
+Dockerfile
+docker-compose.yml
+.dockerignore
+

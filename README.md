@@ -118,6 +118,18 @@ streamlit run app/app.py
 pytest tests/
 ```
 
+### Ejecutar con Docker
+```bash
+# Usando Docker Compose (recomendado)
+docker-compose up --build
+
+# O usando Docker directamente
+docker build -t hate-speech-api .
+docker run -p 8000:8000 -v $(pwd)/models:/app/models:ro hate-speech-api
+```
+
+Ver `docs/DOCKER.md` para más detalles sobre Docker.
+
 ## 🌿 Estrategia de Ramas Git
 
 - **`main`**: Código estable y funcional
@@ -130,6 +142,8 @@ pytest tests/
 - **NLP**: spaCy, NLTK
 - **ML**: scikit-learn, Optuna
 - **Transformers**: Hugging Face Transformers, PyTorch
+- **API**: FastAPI, Uvicorn
+- **Containerización**: Docker, Docker Compose
 - **Visualización**: Streamlit, Matplotlib, Seaborn
 - **Testing**: pytest
 
