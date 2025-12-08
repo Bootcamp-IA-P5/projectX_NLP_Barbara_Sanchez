@@ -41,6 +41,23 @@ except ImportError:
     YOUTUBE_AVAILABLE = False
     print("⚠️  Módulo de YouTube no disponible")
 
+# Importar módulos de BD y MLFlow
+try:
+    from utils.database import get_db_manager
+    from utils.mlflow_tracking import get_tracker
+    DB_AVAILABLE = True
+except ImportError as e:
+    DB_AVAILABLE = False
+    print(f"⚠️  Módulos de BD/MLFlow no disponibles: {e}")
+
+# Inicializar gestores de BD y MLFlow
+if DB_AVAILABLE:
+    db_manager = get_db_manager()
+    mlflow_tracker = get_tracker()
+else:
+    db_manager = None
+    mlflow_tracker = None
+
 # Inicializar FastAPI
 app = FastAPI(
     title="Hate Speech Detection API",
@@ -216,6 +233,22 @@ async def predict_text(request: TextRequest):
     
     try:
         result = predictor.predict(request.text)
+        
+        # Guardar en BD si está disponible
+        if db_manager:
+            try:
+                db_manager.save_prediction(
+                    text=result['text'],
+                    is_toxic=result['is_toxic'],
+                    toxicity_label=result['toxicity_label'],
+                    probability_toxic=result['probability_toxic'],
+                    probability_not_toxic=result['probability_not_toxic'],
+                    confidence=result['confidence'],
+                    source='api'
+                )
+            except Exception as e:
+                print(f"⚠️  Error al guardar en BD: {e}")
+        
         return result
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error al procesar texto: {str(e)}")
@@ -239,6 +272,28 @@ async def predict_batch(request: BatchTextRequest):
     
     try:
         results = predictor.predict_batch(request.texts)
+        
+        # Guardar en BD si está disponible
+        if db_manager:
+            try:
+                db_manager.save_batch_predictions(
+                    predictions=results,
+                    source='batch'
+                )
+                
+                # Logear estadísticas en MLFlow
+                if mlflow_tracker:
+                    toxic_count = sum(1 for r in results if r['is_toxic'])
+                    avg_confidence = sum(r['confidence'] for r in results) / len(results) if results else 0
+                    mlflow_tracker.log_prediction_batch(
+                        predictions_count=len(results),
+                        toxic_count=toxic_count,
+                        avg_confidence=avg_confidence,
+                        source='batch'
+                    )
+            except Exception as e:
+                print(f"⚠️  Error al guardar en BD/MLFlow: {e}")
+        
         return results
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error al procesar textos: {str(e)}")
@@ -303,6 +358,38 @@ async def analyze_youtube_video(request: YouTubeVideoRequest):
         toxic_count = df['is_toxic'].sum()
         toxic_percentage = (toxic_count / len(df)) * 100 if len(df) > 0 else 0
         
+        # Guardar predicciones en BD si está disponible
+        if db_manager:
+            try:
+                predictions_to_save = []
+                for _, row in df.iterrows():
+                    predictions_to_save.append({
+                        'text': str(row.get('text', '')),
+                        'is_toxic': bool(row.get('is_toxic', False)),
+                        'toxicity_label': str(row.get('toxicity_label', 'Not Toxic')),
+                        'probability_toxic': float(row.get('probability_toxic', 0.0)),
+                        'probability_not_toxic': float(row.get('probability_not_toxic', 0.0)),
+                        'confidence': float(row.get('confidence', 0.0))
+                    })
+                
+                db_manager.save_batch_predictions(
+                    predictions=predictions_to_save,
+                    source='youtube',
+                    video_id=video_id
+                )
+                
+                # Logear estadísticas en MLFlow
+                if mlflow_tracker:
+                    avg_confidence = df['confidence'].mean() if not df.empty else 0
+                    mlflow_tracker.log_prediction_batch(
+                        predictions_count=len(df),
+                        toxic_count=int(toxic_count),
+                        avg_confidence=float(avg_confidence),
+                        source='youtube'
+                    )
+            except Exception as e:
+                print(f"⚠️  Error al guardar predicciones de YouTube en BD: {e}")
+        
         return VideoAnalysisResponse(
             video_id=video_id,
             video_url=request.video_url,
@@ -319,6 +406,60 @@ async def analyze_youtube_video(request: YouTubeVideoRequest):
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error al analizar video: {str(e)}")
+
+
+@app.get("/predictions", tags=["Database"])
+async def get_predictions(
+    limit: int = 100,
+    offset: int = 0,
+    is_toxic: Optional[bool] = None,
+    source: Optional[str] = None,
+    video_id: Optional[str] = None
+):
+    """
+    Obtener predicciones guardadas en la base de datos.
+    
+    - **limit**: Número máximo de resultados (default: 100)
+    - **offset**: Offset para paginación (default: 0)
+    - **is_toxic**: Filtrar por toxicidad (true/false)
+    - **source**: Filtrar por origen ('api', 'batch', 'youtube')
+    - **video_id**: Filtrar por ID de video de YouTube
+    
+    Returns:
+    - Lista de predicciones guardadas
+    """
+    if not db_manager:
+        raise HTTPException(status_code=503, detail="Base de datos no disponible")
+    
+    try:
+        predictions = db_manager.get_predictions(
+            limit=limit,
+            offset=offset,
+            is_toxic=is_toxic,
+            source=source,
+            video_id=video_id
+        )
+        return {"predictions": predictions, "count": len(predictions)}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error al obtener predicciones: {str(e)}")
+
+
+@app.get("/predictions/stats", tags=["Database"])
+async def get_prediction_stats():
+    """
+    Obtener estadísticas de las predicciones guardadas.
+    
+    Returns:
+    - Estadísticas agregadas de las predicciones
+    """
+    if not db_manager:
+        raise HTTPException(status_code=503, detail="Base de datos no disponible")
+    
+    try:
+        stats = db_manager.get_statistics()
+        return stats
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error al obtener estadísticas: {str(e)}")
 
 
 if __name__ == "__main__":
