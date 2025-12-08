@@ -14,7 +14,7 @@
 - ✅ **Optimización con Optuna**: Completado
 - ✅ **Ensemble de modelos**: Implementado y evaluado (no mejora vs SVM individual, se usa SVM)
 - ✅ **Tests unitarios**: 46 tests implementados (41 passing, 5 skipped para API)
-- ⚠️ **Integración YouTube (URL)**: Pendiente
+- ✅ **Integración YouTube (URL)**: Completado - extracción y análisis de comentarios
 
 ### 🟠 Nivel Avanzado:
 - ⚠️ **RNN/LSTM**: Pendiente
@@ -47,12 +47,13 @@
    - **Decisión**: Usar SVM optimizado (F1: 0.6866, Overfitting: 2.54%)
    - **Rama**: `feat/07-ensemble` ✅
 
-### 3. **Integración YouTube** - Nivel Medio
-   - Función para extraer comentarios de URL de video
-   - Aplicar modelo a todos los comentarios
-   - Endpoint en API para analizar video
-   - Mostrar resultados
-   - **Rama**: `feat/08-youtube-integration`
+### 3. **Integración YouTube** - Nivel Medio ✅ COMPLETADO
+   - ✅ Función para extraer comentarios de URL de video
+   - ✅ Aplicar modelo a todos los comentarios
+   - ✅ Endpoint en API para analizar video (`POST /analyze/youtube`)
+   - ✅ Módulo `src/utils/youtube.py` con funciones de extracción y análisis
+   - ✅ Notebook de ejemplo (`07_YouTube_Integration.ipynb`)
+   - **Rama**: `feat/08-youtube-integration` ✅
 
 ### 4. **Tests Unitarios** - Nivel Medio ✅ COMPLETADO
    - ✅ Tests para preprocesamiento (13 tests)
