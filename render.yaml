@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: hate-speech-api
+    env: docker
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    plan: free
+    region: oregon
+    envVars:
+      - key: PYTHONUNBUFFERED
+        value: 1
+    healthCheckPath: /health
+    autoDeploy: true
+

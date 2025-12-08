@@ -38,13 +38,14 @@ COPY models/ ./models/
 # Crear directorio para datos si es necesario
 RUN mkdir -p data/processed
 
-# Exponer puerto
+# Exponer puerto (Render usa variable PORT, por defecto 8000)
 EXPOSE 8000
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
-    CMD curl -f http://localhost:8000/health || exit 1
+    CMD curl -f http://localhost:${PORT:-8000}/health || exit 1
 
 # Comando para ejecutar la API
-CMD ["uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Render proporciona variable PORT, usar 8000 como fallback
+CMD uvicorn api.main:app --host 0.0.0.0 --port ${PORT:-8000}
 

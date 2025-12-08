@@ -45,6 +45,12 @@ data/processed/*
 # Modelos entrenados (pueden ser grandes)
 models/*/
 !models/.gitkeep
+# Excluir modelos de Transformers (muy grandes)
+models/distilbert_best_model.pt
+models/transformers/**/*.pt
+models/transformers/**/*.safetensors
+*.pt
+*.safetensors
 
 # Logs y experimentos
 *.log
