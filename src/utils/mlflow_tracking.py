@@ -85,23 +85,38 @@ class MLFlowTracker:
                 # Saltar confusion_matrix y otros arrays multidimensionales
                 if key == 'confusion_matrix':
                     continue
-                    
-                if isinstance(value, (np.ndarray, np.generic)):
-                    # Si es array, tomar el primer elemento o convertir a float
-                    if value.size == 1:
+                
+                # Convertir a float de forma segura
+                try:
+                    if isinstance(value, np.ndarray):
+                        # Si es array, verificar tamaño
+                        if value.ndim > 1:
+                            # Array multidimensional, saltar
+                            continue
+                        elif value.size == 1:
+                            metrics_float[key] = float(value.item())
+                        elif value.size == 0:
+                            continue
+                        else:
+                            # Array 1D con múltiples elementos, tomar el primero
+                            metrics_float[key] = float(value.flat[0])
+                    elif isinstance(value, np.generic):
+                        # Escalar numpy
                         metrics_float[key] = float(value.item())
                     else:
-                        # Si tiene múltiples elementos, tomar la media o el primero
-                        metrics_float[key] = float(value[0]) if len(value) > 0 else 0.0
-                else:
-                    try:
+                        # Python nativo, convertir a float
                         metrics_float[key] = float(value)
-                    except (ValueError, TypeError):
-                        # Si no se puede convertir, saltar esta métrica
-                        continue
+                except (ValueError, TypeError, AttributeError) as e:
+                    # Si no se puede convertir, saltar esta métrica
+                    print(f"⚠️  Saltando métrica '{key}': {type(value).__name__} - {e}")
+                    continue
             
-            # Logear métricas
-            mlflow.log_metrics(metrics_float)
+            # Verificar que tenemos métricas antes de logear
+            if not metrics_float:
+                print("⚠️  No hay métricas válidas para logear en MLFlow")
+            else:
+                # Logear métricas
+                mlflow.log_metrics(metrics_float)
             
             # Logear modelo
             mlflow.sklearn.log_model(
