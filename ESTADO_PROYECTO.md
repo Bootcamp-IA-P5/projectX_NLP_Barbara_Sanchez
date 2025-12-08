@@ -13,8 +13,8 @@
 ### 🟡 Nivel Medio:
 - ✅ **Optimización con Optuna**: Completado
 - ✅ **Ensemble de modelos**: Implementado y evaluado (no mejora vs SVM individual, se usa SVM)
+- ✅ **Tests unitarios**: 46 tests implementados (41 passing, 5 skipped para API)
 - ⚠️ **Integración YouTube (URL)**: Pendiente
-- ⚠️ **Tests unitarios**: Pendiente
 
 ### 🟠 Nivel Avanzado:
 - ⚠️ **RNN/LSTM**: Pendiente
@@ -54,12 +54,15 @@
    - Mostrar resultados
    - **Rama**: `feat/08-youtube-integration`
 
-### 4. **Tests Unitarios** - Nivel Medio
-   - Tests para preprocesamiento
-   - Tests para vectorización
-   - Tests para modelos
-   - Tests para API
-   - **Rama**: `feat/09-tests`
+### 4. **Tests Unitarios** - Nivel Medio ✅ COMPLETADO
+   - ✅ Tests para preprocesamiento (13 tests)
+   - ✅ Tests para vectorización (12 tests)
+   - ✅ Tests para modelos (11 tests)
+   - ✅ Tests para evaluación (6 tests)
+   - ✅ Tests para API (5 tests, se ejecutan si API disponible)
+   - ✅ Configuración pytest.ini y fixtures compartidas
+   - **Total**: 46 tests (41 passing, 5 skipped)
+   - **Rama**: `feat/09-tests` ✅
 
 ### 5. **Transformers (DistilBERT)** - Nivel Experto
    - Implementar DistilBERT en flujo principal
