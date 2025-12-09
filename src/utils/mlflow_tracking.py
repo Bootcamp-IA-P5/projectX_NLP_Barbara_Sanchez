@@ -135,7 +135,7 @@ class MLFlowTracker:
             try:
                 mlflow.sklearn.log_model(
                     sk_model=model,
-                    artifact_path="model",
+                    name="model",  # Usar 'name' en lugar de 'artifact_path' (deprecated)
                     registered_model_name=f"{model_name}_{vectorizer_type}"
                 )
             except (ModuleNotFoundError, ImportError) as e:
