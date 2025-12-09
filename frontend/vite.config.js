@@ -5,6 +5,7 @@ export default defineConfig({
   plugins: [react()],
   server: {
     port: 3000,
+    open: true, // Abre automáticamente el navegador
     proxy: {
       '/api': {
         target: 'http://localhost:8000',
