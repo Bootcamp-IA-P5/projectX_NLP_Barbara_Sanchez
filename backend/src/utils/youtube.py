@@ -96,13 +96,28 @@ def extract_comments(video_url: str, max_comments: int = 100, sort_by: str = 'to
             if len(comments) >= max_comments:
                 break
             
+            # Convertir valores numéricos a int de forma segura
+            votes = comment.get('votes', 0)
+            reply_count = comment.get('reply_count', 0)
+            
+            # Convertir a int si es string o mantener como int
+            try:
+                likes = int(votes) if votes else 0
+            except (ValueError, TypeError):
+                likes = 0
+            
+            try:
+                reply_count_int = int(reply_count) if reply_count else 0
+            except (ValueError, TypeError):
+                reply_count_int = 0
+            
             comments.append({
-                'comment_id': comment.get('comment_id', ''),
-                'text': comment.get('text', ''),
-                'author': comment.get('author', ''),
-                'likes': comment.get('votes', 0),
-                'time': comment.get('time', ''),
-                'reply_count': comment.get('reply_count', 0)
+                'comment_id': str(comment.get('comment_id', '')),
+                'text': str(comment.get('text', '')),
+                'author': str(comment.get('author', '')),
+                'likes': likes,
+                'time': str(comment.get('time', '')),
+                'reply_count': reply_count_int
             })
     except Exception as e:
         raise RuntimeError(f"Error al extraer comentarios: {e}")
