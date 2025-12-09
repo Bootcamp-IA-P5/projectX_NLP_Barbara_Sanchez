@@ -131,12 +131,22 @@ class MLFlowTracker:
                 # Logear métricas
                 mlflow.log_metrics(metrics_float)
             
-            # Logear modelo
-            mlflow.sklearn.log_model(
-                model,
-                "model",
-                registered_model_name=f"{model_name}_{vectorizer_type}"
-            )
+            # Logear modelo (opcional, puede fallar si falta _lzma)
+            try:
+                mlflow.sklearn.log_model(
+                    sk_model=model,
+                    artifact_path="model",
+                    registered_model_name=f"{model_name}_{vectorizer_type}"
+                )
+            except (ModuleNotFoundError, ImportError) as e:
+                # Si falla por falta de módulos del sistema, solo logear parámetros y métricas
+                print(f"⚠️  No se pudo guardar el modelo en MLFlow: {e}")
+                print("   Se guardaron las métricas y parámetros correctamente.")
+                print("   Para guardar modelos, instala Python con soporte completo o usa SQLite backend.")
+            except Exception as e:
+                # Otros errores también se manejan
+                print(f"⚠️  Error al guardar modelo en MLFlow: {e}")
+                print("   Se guardaron las métricas y parámetros correctamente.")
             
             # Logear tags
             if tags:
