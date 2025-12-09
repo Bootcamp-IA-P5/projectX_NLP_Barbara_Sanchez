@@ -152,6 +152,11 @@ def analyze_video_comments(
     max_comments: int = 100,
     sort_by: str = 'top'
 ) -> pd.DataFrame:
+    # Asegurar que max_comments sea int
+    try:
+        max_comments = int(max_comments)
+    except (ValueError, TypeError):
+        max_comments = 100
     """
     Extraer y analizar comentarios de un video de YouTube.
     
