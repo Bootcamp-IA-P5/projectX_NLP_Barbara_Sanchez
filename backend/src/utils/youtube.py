@@ -57,11 +57,6 @@ def extract_video_id(url: str) -> Optional[str]:
 
 
 def extract_comments(video_url: str, max_comments: int = 100, sort_by: str = 'top') -> List[Dict[str, Any]]:
-    # Asegurar que max_comments sea int
-    try:
-        max_comments = int(max_comments)
-    except (ValueError, TypeError):
-        max_comments = 100
     """
     Extraer comentarios de un video de YouTube.
     
@@ -77,6 +72,11 @@ def extract_comments(video_url: str, max_comments: int = 100, sort_by: str = 'to
         ImportError: Si youtube-comment-downloader no está instalado
         ValueError: Si no se puede extraer el ID del video
     """
+    # Asegurar que max_comments sea int
+    try:
+        max_comments = int(max_comments)
+    except (ValueError, TypeError):
+        max_comments = 100
     if not YOUTUBE_DOWNLOADER_AVAILABLE:
         raise ImportError(
             "youtube-comment-downloader no está instalado. "
