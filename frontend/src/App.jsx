@@ -1,12 +1,22 @@
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import Layout from './components/Layout';
+import HomePage from './pages/HomePage';
+import BatchPage from './pages/BatchPage';
+import YouTubePage from './pages/YouTubePage';
+
 function App() {
   return (
-    <div className="min-h-screen bg-gray-50">
-      <h1 className="text-3xl font-bold text-center py-8">
-        Hate Speech Detection
-      </h1>
-    </div>
-  )
+    <Router>
+      <Layout>
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/batch" element={<BatchPage />} />
+          <Route path="/youtube" element={<YouTubePage />} />
+        </Routes>
+      </Layout>
+    </Router>
+  );
 }
 
-export default App
+export default App;
 
