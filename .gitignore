@@ -58,6 +58,11 @@ logs/
 mlruns/
 .mlflow/
 
+# Database files
+*.db
+*.sqlite
+data/predictions.db
+
 # OS
 .DS_Store
 Thumbs.db
