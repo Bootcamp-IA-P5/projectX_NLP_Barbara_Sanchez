@@ -57,6 +57,11 @@ def extract_video_id(url: str) -> Optional[str]:
 
 
 def extract_comments(video_url: str, max_comments: int = 100, sort_by: str = 'top') -> List[Dict[str, Any]]:
+    # Asegurar que max_comments sea int
+    try:
+        max_comments = int(max_comments)
+    except (ValueError, TypeError):
+        max_comments = 100
     """
     Extraer comentarios de un video de YouTube.
     
@@ -181,6 +186,7 @@ def analyze_video_comments(
                 'is_toxic': result['is_toxic'],
                 'toxicity_label': result['toxicity_label'],
                 'probability_toxic': result['probability_toxic'],
+                'probability_not_toxic': result.get('probability_not_toxic', 1.0 - result['probability_toxic']),
                 'confidence': result['confidence']
             })
         except Exception as e:
