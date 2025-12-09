@@ -1,0 +1,14 @@
+artifact_uri: file:///Users/barbara/Desktop/bootcamp IA/projectX_NLP_B-rbara_S-nchez/mlruns/345044762102670505/9604b91feede4da799869d3dc6ceb4e8/artifacts
+end_time: 1765302281532
+entry_point_name: ''
+experiment_id: '345044762102670505'
+lifecycle_stage: active
+run_id: 9604b91feede4da799869d3dc6ceb4e8
+run_name: naive_bayes
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1765302281468
+status: 3
+tags: []
+user_id: barbara

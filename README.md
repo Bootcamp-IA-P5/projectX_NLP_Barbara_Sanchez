@@ -36,26 +36,23 @@ YouTube necesita una solución automatizada para detectar y moderar comentarios 
 
 ```
 projectX_NLP_B-rbara_S-nchez/
-├── data/                    # Datos del proyecto
-│   ├── raw/                 # Datos originales
-│   └── processed/           # Datos preprocesados
-├── notebooks/               # Notebooks de análisis y experimentación
-│   ├── 01_EDA.ipynb
-│   ├── 02_Preprocessing.ipynb
-│   ├── 03_Feature_Engineering.ipynb
-│   ├── 04_Modeling_Baseline.ipynb
-│   ├── 05_Hyperparameter_Tuning.ipynb
-│   ├── 06_Anti_Overfitting.ipynb
-│   └── 07_Transformers.ipynb
-├── src/                     # Código fuente modularizado
-│   ├── data/                # Carga y preprocesamiento
-│   ├── features/            # Feature engineering
-│   ├── models/              # Modelos ML
-│   └── utils/               # Utilidades
-├── app/                     # Aplicación Streamlit
-├── models/                  # Modelos entrenados guardados
-├── tests/                   # Tests unitarios
-└── docs/                    # Documentación
+├── backend/                 # Backend (API, modelos, notebooks)
+│   ├── src/                 # Código fuente Python
+│   │   ├── api/             # Módulo de predicción
+│   │   ├── data/            # Preprocesamiento
+│   │   ├── features/        # Feature engineering
+│   │   ├── models/          # Modelos ML
+│   │   └── utils/           # Utilidades (BD, MLFlow, YouTube)
+│   ├── api/                 # API REST (FastAPI)
+│   ├── data/                # Datos (raw y processed)
+│   ├── models/              # Modelos entrenados
+│   ├── notebooks/           # Jupyter notebooks
+│   ├── tests/               # Tests unitarios
+│   ├── scripts/             # Scripts de utilidad
+│   └── requirements.txt      # Dependencias Python
+├── frontend/                # Frontend (a implementar)
+├── docs/                    # Documentación general
+└── README.md                # Este archivo
 
 ```
 
@@ -73,15 +70,18 @@ git clone <url-del-repositorio>
 cd projectX_NLP_B-rbara_S-nchez
 ```
 
-2. **Crear entorno virtual**
+2. **Instalar backend**
 ```bash
+cd backend
 python -m venv venv
 source venv/bin/activate  # En Windows: venv\Scripts\activate
+pip install -r requirements.txt
 ```
 
-3. **Instalar dependencias**
+3. **Instalar frontend** (cuando esté disponible)
 ```bash
-pip install -r requirements.txt
+cd frontend
+npm install  # o yarn install
 ```
 
 4. **Descargar modelos de spaCy**
@@ -103,32 +103,43 @@ python -c "import nltk; nltk.download('punkt'); nltk.download('stopwords'); nltk
 
 ## 🔧 Uso
 
-### Entrenar modelo
+### Backend
+
+#### Ejecutar la API
 ```bash
-python src/models/train.py
+cd backend
+bash api/run.sh
+# O directamente:
+uvicorn api.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
-### Ejecutar aplicación Streamlit
+#### Ejecutar tests
 ```bash
-streamlit run app/app.py
-```
-
-### Ejecutar tests
-```bash
+cd backend
 pytest tests/
 ```
 
-### Ejecutar con Docker
+#### Ejecutar con Docker
 ```bash
-# Usando Docker Compose (recomendado)
+cd backend
 docker-compose up --build
-
-# O usando Docker directamente
-docker build -t hate-speech-api .
-docker run -p 8000:8000 -v $(pwd)/models:/app/models:ro hate-speech-api
 ```
 
 Ver `docs/DOCKER.md` para más detalles sobre Docker.
+
+### Frontend
+
+El frontend estará disponible en `frontend/` una vez implementado.
+
+## 📡 API
+
+La API REST está disponible en `http://localhost:8000` cuando el backend está ejecutándose.
+
+- **Documentación interactiva**: http://localhost:8000/docs
+- **ReDoc**: http://localhost:8000/redoc
+- **Health Check**: http://localhost:8000/health
+
+Ver `backend/api/README.md` para documentación completa de la API.
 
 ## 🌿 Estrategia de Ramas Git
 

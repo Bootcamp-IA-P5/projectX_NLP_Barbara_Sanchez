@@ -1,0 +1,14 @@
+artifact_uri: file:///Users/barbara/Desktop/bootcamp IA/projectX_NLP_B-rbara_S-nchez/mlruns/345044762102670505/d2d87e50ee2847baa1271f634eacc5f5/artifacts
+end_time: 1765228471768
+entry_point_name: ''
+experiment_id: '345044762102670505'
+lifecycle_stage: active
+run_id: d2d87e50ee2847baa1271f634eacc5f5
+run_name: svm
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1765228471749
+status: 4
+tags: []
+user_id: barbara

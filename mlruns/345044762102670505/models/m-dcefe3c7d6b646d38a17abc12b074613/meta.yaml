@@ -1,0 +1,10 @@
+artifact_location: file:///Users/barbara/Desktop/bootcamp IA/projectX_NLP_B-rbara_S-nchez/mlruns/345044762102670505/models/m-dcefe3c7d6b646d38a17abc12b074613/artifacts
+creation_timestamp: 1765302115827
+experiment_id: '345044762102670505'
+last_updated_timestamp: 1765302115876
+model_id: m-dcefe3c7d6b646d38a17abc12b074613
+model_type: null
+name: model
+source_run_id: a1c3aefda198446583859cc20b0f4c75
+status: 3
+status_message: null

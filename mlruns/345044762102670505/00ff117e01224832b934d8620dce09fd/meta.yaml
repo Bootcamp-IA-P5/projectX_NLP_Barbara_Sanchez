@@ -1,0 +1,14 @@
+artifact_uri: file:///Users/barbara/Desktop/bootcamp IA/projectX_NLP_B-rbara_S-nchez/mlruns/345044762102670505/00ff117e01224832b934d8620dce09fd/artifacts
+end_time: 1765302281440
+entry_point_name: ''
+experiment_id: '345044762102670505'
+lifecycle_stage: active
+run_id: 00ff117e01224832b934d8620dce09fd
+run_name: logistic
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1765302281358
+status: 3
+tags: []
+user_id: barbara

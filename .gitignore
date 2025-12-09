@@ -38,30 +38,30 @@ ENV/
 *~
 
 # Data files (mantener estructura pero ignorar datos grandes)
-data/processed/*
-!data/processed/.gitkeep
-!data/raw/.gitkeep
+backend/data/processed/*
+!backend/data/processed/.gitkeep
+!backend/data/raw/.gitkeep
 
 # Modelos entrenados (pueden ser grandes)
-models/*/
-!models/.gitkeep
+backend/models/*/
+!backend/models/.gitkeep
 # Excluir modelos de Transformers (muy grandes)
-models/distilbert_best_model.pt
-models/transformers/**/*.pt
-models/transformers/**/*.safetensors
+backend/models/distilbert_best_model.pt
+backend/models/transformers/**/*.pt
+backend/models/transformers/**/*.safetensors
 *.pt
 *.safetensors
 
 # Logs y experimentos
 *.log
 logs/
-mlruns/
+backend/mlruns/
 .mlflow/
 
 # Database files
 *.db
 *.sqlite
-data/predictions.db
+backend/data/predictions.db
 
 # OS
 .DS_Store

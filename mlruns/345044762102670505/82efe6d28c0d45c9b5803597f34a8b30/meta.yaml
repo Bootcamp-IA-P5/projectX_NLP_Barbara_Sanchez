@@ -1,0 +1,14 @@
+artifact_uri: file:///Users/barbara/Desktop/bootcamp IA/projectX_NLP_B-rbara_S-nchez/mlruns/345044762102670505/82efe6d28c0d45c9b5803597f34a8b30/artifacts
+end_time: 1765302281791
+entry_point_name: ''
+experiment_id: '345044762102670505'
+lifecycle_stage: active
+run_id: 82efe6d28c0d45c9b5803597f34a8b30
+run_name: random_forest
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1765302281708
+status: 3
+tags: []
+user_id: barbara

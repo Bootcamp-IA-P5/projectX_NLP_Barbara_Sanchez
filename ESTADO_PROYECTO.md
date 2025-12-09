@@ -27,8 +27,8 @@
   - Módulo `src/models/transformers.py` creado
   - Notebooks de entrenamiento y comparación
   - **Decisión**: DistilBERT cumple nivel experto, pero SVM optimizado se usa en producción (mejor balance)
-- ⚠️ **Base de datos**: Pendiente
-- ⚠️ **MLFlow**: Pendiente
+- ✅ **Base de datos**: Completado - SQLite para almacenar predicciones
+- ✅ **MLFlow**: Completado - Tracking de experimentos y métricas
 
 ---
 
@@ -85,15 +85,36 @@
    - ✅ API funcionando en contenedor Docker
    - **Rama**: `feat/14-docker` ✅
 
-### 7. **Base de Datos y MLFlow** - Nivel Experto
-   - Guardar predicciones en BD
-   - Tracking con MLFlow
-   - **Rama**: `feat/12-database-mlflow`
+### 7. **Base de Datos y MLFlow** - Nivel Experto ✅ COMPLETADO
+   - ✅ Guardar predicciones en BD (SQLite)
+   - ✅ Tracking con MLFlow (métricas y parámetros)
+   - ✅ Notebooks de verificación y tracking
+   - ✅ Documentación completa (DATABASE_GUIDE.md, MLFLOW_GUIDE.md)
+   - **Rama**: `feat/12-database-mlflow` ✅
 
 ### 8. **Despliegue Público** - Nivel Avanzado
-   - Desplegar API en servidor público (Heroku, AWS, Railway, etc.)
+   - Desplegar API en servidor público (Heroku, AWS, Railway, Render, etc.)
    - Configurar dominio
    - **Rama**: `feat/15-deployment`
+
+### 9. **Frontend** - Opcional (no requerido en niveles)
+   - Interfaz web para usar la API
+   - Análisis de texto individual
+   - Análisis por lotes
+   - Análisis de videos de YouTube
+   - Ver estadísticas
+   - **Prompt disponible en**: `docs/FRONTEND_PROMPT.md`
+   - **Carpeta**: `frontend/` (a crear)
+
+### 10. **RNN/LSTM** - Nivel Avanzado
+   - Implementar red neuronal recurrente
+   - Comparar con modelos clásicos
+   - **Rama**: `feat/13-rnn-lstm`
+
+### 11. **Seguimiento en Tiempo Real** - Nivel Avanzado
+   - Analizar comentarios de YouTube en tiempo real
+   - WebSocket o polling para actualizaciones
+   - **Rama**: `feat/16-realtime-tracking`
 
 ---
 
