@@ -20,13 +20,13 @@ export function ModelInfo() {
     trainF1: 0.7119,
   };
 
-  // Datos del dataset (EDA)
+  // Datos del dataset (EDA) - Valores reales
   const datasetInfo = {
     totalComments: 1000,
     toxicCount: 462,
     notToxicCount: 538,
-    avgLength: 145.3,
-    avgWords: 24.5,
+    avgLength: 98.4,
+    avgWords: 16.1,
   };
 
   // Matriz de confusión (ejemplo - debería venir de evaluación real)
