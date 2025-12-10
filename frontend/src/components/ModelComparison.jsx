@@ -88,8 +88,8 @@ export function ModelComparison() {
     precision: 0.8047,
     recall: 0.7473,
     overfitting: 12.19,
-    status: 'optimal',
-    note: 'Modelo en producción - Mejor F1-Score (umbral: 0.65)',
+    status: 'high_overfitting', // Overfitting alto pero mejor F1-Score
+    note: 'Modelo en producción - Mejor F1-Score (umbral: 0.65). Overfitting: 12.19%',
     improvement: {
       f1: '+12.87%',
       accuracy: '+37.04%',
