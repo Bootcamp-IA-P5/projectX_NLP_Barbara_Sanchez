@@ -3,7 +3,7 @@ import { analyzeYouTube } from '../services/api';
 
 function YouTubePage() {
   const [videoUrl, setVideoUrl] = useState('');
-  const [maxComments, setMaxComments] = useState(100);
+  const [maxComments, setMaxComments] = useState(20); // Reducido a 20 para evitar errores
   const [sortBy, setSortBy] = useState('top');
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);

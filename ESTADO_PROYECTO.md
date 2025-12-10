@@ -85,6 +85,7 @@
    - ✅ API funcionando en contenedor Docker
    - **Rama**: `feat/14-docker` ✅
 
+
 ### 7. **Base de Datos y MLFlow** - Nivel Experto ✅ COMPLETADO
    - ✅ Guardar predicciones en BD (SQLite)
    - ✅ Tracking con MLFlow (métricas y parámetros)

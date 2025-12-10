@@ -109,41 +109,64 @@ def extract_comments(video_url: str, max_comments: int = 100, sort_by: str = 'to
         full_url = f"https://www.youtube.com/watch?v={video_id}"
         
         # Intentar obtener comentarios con manejo de errores más específico
-        comment_generator = downloader.get_comments_from_url(
-            full_url,
-            sort_by=sort_by
-        )
+        # El error puede ocurrir al crear el generador o al iterar sobre él
+        try:
+            comment_generator = downloader.get_comments_from_url(
+                full_url,
+                sort_by=sort_by
+            )
+        except (TypeError, ValueError) as e:
+            error_msg = str(e)
+            if "'>=' not supported" in error_msg or "'<=' not supported" in error_msg or "'>' not supported" in error_msg or "'<' not supported" in error_msg:
+                # Intentar sin sort_by como workaround
+                print(f"⚠️  Error con sort_by='{sort_by}', intentando sin sort_by...")
+                comment_generator = downloader.get_comments_from_url(full_url)
+            else:
+                raise
         
+        # Iterar sobre los comentarios con manejo de errores
         for comment in comment_generator:
-            # Usar contador explícito en lugar de len() para evitar problemas
-            if comment_count >= max_comments:
-                break
-            
-            # Convertir valores numéricos a int de forma segura
-            votes = comment.get('votes', 0)
-            reply_count = comment.get('reply_count', 0)
-            
-            # Convertir a int si es string o mantener como int
             try:
-                likes = int(votes) if votes is not None and votes != '' else 0
-            except (ValueError, TypeError):
-                likes = 0
-            
-            try:
-                reply_count_int = int(reply_count) if reply_count is not None and reply_count != '' else 0
-            except (ValueError, TypeError):
-                reply_count_int = 0
-            
-            comments.append({
-                'comment_id': str(comment.get('comment_id', '')),
-                'text': str(comment.get('text', '')),
-                'author': str(comment.get('author', '')),
-                'likes': likes,
-                'time': str(comment.get('time', '')),
-                'reply_count': reply_count_int
-            })
-            
-            comment_count += 1
+                # Usar contador explícito en lugar de len() para evitar problemas
+                if comment_count >= max_comments:
+                    break
+                
+                # Convertir valores numéricos a int de forma segura
+                votes = comment.get('votes', 0)
+                reply_count = comment.get('reply_count', 0)
+                
+                # Convertir a int si es string o mantener como int
+                try:
+                    likes = int(votes) if votes is not None and votes != '' else 0
+                except (ValueError, TypeError):
+                    likes = 0
+                
+                try:
+                    reply_count_int = int(reply_count) if reply_count is not None and reply_count != '' else 0
+                except (ValueError, TypeError):
+                    reply_count_int = 0
+                
+                comments.append({
+                    'comment_id': str(comment.get('comment_id', '')),
+                    'text': str(comment.get('text', '')),
+                    'author': str(comment.get('author', '')),
+                    'likes': likes,
+                    'time': str(comment.get('time', '')),
+                    'reply_count': reply_count_int
+                })
+                
+                comment_count += 1
+                
+            except (TypeError, ValueError) as e:
+                # Error al procesar un comentario individual - continuar con el siguiente
+                error_msg = str(e)
+                if "'>=' not supported" in error_msg or "'<=' not supported" in error_msg:
+                    # Si es un error de tipo, puede ser un problema con este comentario específico
+                    print(f"⚠️  Error procesando comentario {comment_count + 1}, saltando...")
+                    continue
+                else:
+                    # Otro tipo de error - re-lanzar
+                    raise
             
     except TypeError as e:
         # Error específico de comparación de tipos - puede ser un bug de la librería
