@@ -14,7 +14,12 @@ if str(src_path) not in sys.path:
 
 # Importar app
 try:
-    from api.main import app
+    import sys
+    from pathlib import Path
+    backend_root = Path(__file__).parent.parent
+    if str(backend_root) not in sys.path:
+        sys.path.insert(0, str(backend_root))
+    from main import app
     API_AVAILABLE = True
 except ImportError:
     API_AVAILABLE = False

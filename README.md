@@ -648,8 +648,8 @@ Este proyecto es parte de un bootcamp de IA.
 - [Guía de Despliegue](docs/DEPLOYMENT.md)
 - [Guía de Base de Datos](docs/DATABASE_GUIDE.md)
 - [Guía de MLFlow](docs/MLFLOW_GUIDE.md)
-- [Resumen del Proyecto](PROJECT_SUMMARY.md)
-- [Presentación](PRESENTACION.md)
+
+
 
 ---
 
