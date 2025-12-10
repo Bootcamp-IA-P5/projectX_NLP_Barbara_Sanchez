@@ -6,6 +6,7 @@ import { Results } from './components/Results';
 import { ModelInfo } from './components/ModelInfo';
 import { Statistics } from './components/Statistics';
 import { MLflowMetrics } from './components/MLflowMetrics';
+import { ModelComparison } from './components/ModelComparison';
 
 /**
  * Formato de resultado del análisis
