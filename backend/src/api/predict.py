@@ -77,25 +77,36 @@ class HateSpeechPredictor:
         probabilities = self.model.predict_proba(text_vectorized)[0]
         
         # AMPLIFICAR DIFERENCIAS EN PROBABILIDADES
-        # Aplicar transformación MUY AGRESIVA para hacer las probabilidades más extremas y distinguibles
-        # Esto hace que textos claramente tóxicos tengan prob > 0.7
-        # y textos claramente no tóxicos tengan prob < 0.3
+        # Aplicar transformación para hacer las probabilidades más extremas y distinguibles
+        # Usa una función que preserva las diferencias relativas pero amplifica el rango
         prob_toxic_raw = float(probabilities[1])
         
-        # Transformación MUY AGRESIVA: amplificar diferencias desde 0.5 usando factor multiplicativo alto
-        # Factor de amplificación: 10.0 (hace diferencias MUY notables)
-        if prob_toxic_raw > 0.5:
-            # Si es tóxico, amplificar hacia 1.0
-            # Ejemplo: 0.51 -> 0.60, 0.52 -> 0.70, 0.55 -> 1.0
-            diff = prob_toxic_raw - 0.5
-            prob_toxic = 0.5 + diff * 10.0
-            prob_toxic = min(prob_toxic, 0.90)  # Limitar a 0.90 máximo
+        # Transformación: mapear rango [0.4, 0.6] a [0.2, 0.8] para amplificar diferencias
+        # Esto hace que pequeñas diferencias se vuelvan más notables
+        if prob_toxic_raw >= 0.5:
+            # Textos tóxicos: mapear [0.5, 0.6] a [0.5, 0.85]
+            # Usar función exponencial para amplificar más los valores altos
+            normalized = (prob_toxic_raw - 0.5) / 0.1  # Normalizar a [0, 1] para valores [0.5, 0.6]
+            prob_toxic = 0.5 + normalized * 0.35  # Mapear a [0.5, 0.85]
+            prob_toxic = min(prob_toxic, 0.85)
         else:
-            # Si no es tóxico, amplificar hacia 0.0
-            # Ejemplo: 0.49 -> 0.40, 0.48 -> 0.30, 0.45 -> 0.0
-            diff = 0.5 - prob_toxic_raw
-            prob_toxic = 0.5 - diff * 10.0
-            prob_toxic = max(prob_toxic, 0.10)  # Limitar a 0.10 mínimo
+            # Textos no tóxicos: mapear [0.4, 0.5] a [0.15, 0.5]
+            # Preservar diferencias relativas
+            normalized = (0.5 - prob_toxic_raw) / 0.1  # Normalizar a [0, 1] para valores [0.4, 0.5]
+            prob_toxic = 0.5 - normalized * 0.35  # Mapear a [0.15, 0.5]
+            prob_toxic = max(prob_toxic, 0.15)
+        
+        # Si está fuera del rango [0.4, 0.6], aplicar transformación más agresiva
+        if prob_toxic_raw > 0.6:
+            # Muy tóxico: amplificar más
+            diff = prob_toxic_raw - 0.6
+            prob_toxic = 0.85 + diff * 2.0  # Amplificar diferencia adicional
+            prob_toxic = min(prob_toxic, 0.90)
+        elif prob_toxic_raw < 0.4:
+            # Muy no tóxico: reducir más
+            diff = 0.4 - prob_toxic_raw
+            prob_toxic = 0.15 - diff * 2.0  # Amplificar diferencia adicional
+            prob_toxic = max(prob_toxic, 0.10)
         
         # Asegurar que sumen 1.0
         prob_not_toxic = 1.0 - prob_toxic
