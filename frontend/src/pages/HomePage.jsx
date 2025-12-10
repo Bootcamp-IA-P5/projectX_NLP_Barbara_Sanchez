@@ -8,19 +8,31 @@ function HomePage() {
   const [error, setError] = useState(null);
 
   const handleAnalyze = async () => {
-    if (!text.trim()) {
+    const textToAnalyze = text.trim();
+    
+    if (!textToAnalyze) {
       setError('Por favor, ingresa un texto para analizar');
       return;
     }
 
     setLoading(true);
     setError(null);
-    setResult(null);
+    setResult(null); // Limpiar resultado anterior
 
     try {
-      const analysisResult = await analyzeText(text);
+      // Asegurar que enviamos el texto actual, no el del estado anterior
+      console.log('Analizando texto:', textToAnalyze);
+      const analysisResult = await analyzeText(textToAnalyze);
+      console.log('Resultado recibido:', analysisResult);
+      
+      // Verificar que el resultado corresponde al texto enviado
+      if (analysisResult.text !== textToAnalyze) {
+        console.warn('⚠️ El texto del resultado no coincide con el enviado');
+      }
+      
       setResult(analysisResult);
     } catch (err) {
+      console.error('Error al analizar:', err);
       setError(err.message || 'Error al analizar el texto');
     } finally {
       setLoading(false);
@@ -144,8 +156,17 @@ function HomePage() {
           <div className="mt-6 pt-6 border-t border-gray-200">
             <p className="text-sm text-gray-600 mb-2">Texto Analizado:</p>
             <p className="text-gray-800 bg-gray-50 p-3 rounded-lg">
-              {result.text}
+              {text || result.text}
             </p>
+            
+            {/* Advertencia sobre limitaciones del modelo */}
+            <div className="mt-4 bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+              <p className="text-xs text-yellow-800">
+                <strong>⚠️ Nota importante:</strong> Este modelo fue entrenado con datos en <strong>inglés</strong>. 
+                Los textos en español o con palabras desconocidas pueden dar resultados idénticos. 
+                Para obtener predicciones precisas, usa textos en inglés.
+              </p>
+            </div>
           </div>
         </div>
       )}

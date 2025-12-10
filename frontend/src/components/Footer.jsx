@@ -4,7 +4,7 @@ function Footer() {
       <div className="container mx-auto px-4 py-6">
         <div className="text-center">
           <p className="text-sm">
-            © 2024 Hate Speech Detection - Proyecto NLP
+            © 2025 Hate Speech Detection - Proyecto NLP
           </p>
           <p className="text-xs text-gray-400 mt-2">
             Sistema de detección de mensajes de odio usando Machine Learning
