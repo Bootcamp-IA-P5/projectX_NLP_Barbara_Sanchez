@@ -96,12 +96,16 @@ def extract_comments(video_url: str, max_comments: int = 100, sort_by: str = 'to
     comment_count = 0  # Contador explícito para evitar problemas de tipo
     
     try:
+        # Limitar el número de comentarios que intentamos obtener
+        # La librería puede tener problemas con números grandes
+        max_to_fetch = min(int(max_comments), 100)  # Máximo 100 para evitar problemas
+        
         for comment in downloader.get_comments_from_url(
             f"https://www.youtube.com/watch?v={video_id}",
-            sort_by=sort_by
+            sort_by=str(sort_by)  # Asegurar que sort_by sea string
         ):
             # Usar contador explícito en lugar de len() para evitar problemas
-            if comment_count >= max_comments:
+            if comment_count >= max_to_fetch:
                 break
             
             # Convertir valores numéricos a int de forma segura
@@ -131,12 +135,16 @@ def extract_comments(video_url: str, max_comments: int = 100, sort_by: str = 'to
             comment_count += 1
             
     except TypeError as e:
-        # Error específico de comparación de tipos
+        # Error específico de comparación de tipos - puede ser un bug de la librería
         error_msg = str(e)
         if "'>=' not supported" in error_msg or "'<=' not supported" in error_msg:
+            # Intentar con menos comentarios como workaround
+            if max_comments > 20:
+                print(f"⚠️  Error con {max_comments} comentarios, intentando con 20...")
+                return extract_comments(video_url, max_comments=20, sort_by=sort_by)
             raise RuntimeError(
                 f"Error de tipo en la librería de YouTube. "
-                f"Intenta con menos comentarios o verifica la URL. Error: {error_msg}"
+                f"Intenta con menos comentarios (máximo 20) o verifica la URL. Error: {error_msg}"
             )
         raise RuntimeError(f"Error al extraer comentarios: {e}")
     except Exception as e:
