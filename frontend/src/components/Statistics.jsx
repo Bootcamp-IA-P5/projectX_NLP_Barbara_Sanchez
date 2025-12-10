@@ -54,26 +54,29 @@ export function Statistics({ results = [] }) {
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {[
-          { icon: TrendingUp, color: 'blue', title: 'Total Analizado', value: results.length, subtitle: 'comentarios procesados' },
-          { icon: AlertCircle, color: 'red', title: 'Odio Detectado', value: hatefulCount, subtitle: `${hatefulPercentage.toFixed(1)}% del total` },
-          { icon: Shield, color: 'green', title: 'Confianza Promedio', value: `${(avgConfidence * 100).toFixed(1)}%`, subtitle: 'del modelo' },
-        ].map((card, index) => (
-          <motion.div
-            key={card.title}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.1 }}
-            whileHover={{ scale: 1.05, y: -5 }}
-            className="bg-white rounded-lg shadow-lg p-6"
-          >
-            <div className="flex items-center gap-3 mb-2">
-              <card.icon className={`w-8 h-8 text-${card.color}-600`} />
-              <h3 className="text-slate-900">{card.title}</h3>
-            </div>
-            <p className="text-slate-900">{card.value}</p>
-            <p className="text-slate-600 text-sm">{card.subtitle}</p>
-          </motion.div>
-        ))}
+          { icon: TrendingUp, colorClass: 'text-blue-600', title: 'Total Analizado', value: results.length, subtitle: 'comentarios procesados' },
+          { icon: AlertCircle, colorClass: 'text-red-600', title: 'Odio Detectado', value: hatefulCount, subtitle: `${hatefulPercentage.toFixed(1)}% del total` },
+          { icon: Shield, colorClass: 'text-green-600', title: 'Confianza Promedio', value: `${(avgConfidence * 100).toFixed(1)}%`, subtitle: 'del modelo' },
+        ].map((card, index) => {
+          const IconComponent = card.icon;
+          return (
+            <motion.div
+              key={card.title}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.1 }}
+              whileHover={{ scale: 1.05, y: -5 }}
+              className="bg-white rounded-lg shadow-lg p-6"
+            >
+              <div className="flex items-center gap-3 mb-2">
+                <IconComponent className={`w-8 h-8 ${card.colorClass}`} />
+                <h3 className="text-slate-900">{card.title}</h3>
+              </div>
+              <p className="text-slate-900">{card.value}</p>
+              <p className="text-slate-600 text-sm">{card.subtitle}</p>
+            </motion.div>
+          );
+        })}
       </div>
 
       {/* Charts */}
