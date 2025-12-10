@@ -329,12 +329,13 @@ async def analyze_youtube_video(request: YouTubeVideoRequest):
             raise HTTPException(status_code=400, detail="No se pudo extraer el ID del video de la URL")
         
         # Analizar comentarios
+        # Siempre usar 'top' como sort_by para evitar bugs de la librería
         try:
             df = analyze_video_comments(
                 request.video_url,
                 predictor,
-                max_comments=request.max_comments,
-                sort_by=request.sort_by
+                max_comments=min(request.max_comments, 50),  # Limitar a 50 máximo
+                sort_by='top'  # Siempre usar 'top' para estabilidad
             )
         except RuntimeError as e:
             # Error específico de extracción de comentarios

@@ -91,11 +91,12 @@ def extract_comments(video_url: str, max_comments: int = 100, sort_by: str = 'to
     if not video_id:
         raise ValueError(f"No se pudo extraer el ID del video de la URL: {video_url}")
     
-    # Validar sort_by - asegurar que sea string válido
+    # Validar sort_by - SIEMPRE usar 'top' por defecto para evitar bugs
+    # La librería tiene problemas con 'time' y 'relevance'
     valid_sort_options = ['top', 'time', 'relevance']
     if sort_by not in valid_sort_options:
         sort_by = 'top'
-    sort_by = str(sort_by).lower()  # Asegurar lowercase y string
+    sort_by = str(sort_by).lower()
     
     # Inicializar downloader
     downloader = YoutubeCommentDownloader()
@@ -108,19 +109,20 @@ def extract_comments(video_url: str, max_comments: int = 100, sort_by: str = 'to
         # Construir URL completa
         full_url = f"https://www.youtube.com/watch?v={video_id}"
         
-        # Intentar obtener comentarios con manejo de errores más específico
-        # El error puede ocurrir al crear el generador o al iterar sobre él
+        # Intentar obtener comentarios - SIEMPRE empezar sin sort_by para evitar bugs
+        # Si el usuario quiere otro orden, lo intentamos después
+        comment_generator = None
         try:
-            comment_generator = downloader.get_comments_from_url(
-                full_url,
-                sort_by=sort_by
-            )
+            # Primero intentar sin sort_by (más estable)
+            comment_generator = downloader.get_comments_from_url(full_url)
         except (TypeError, ValueError) as e:
             error_msg = str(e)
-            if "'>=' not supported" in error_msg or "'<=' not supported" in error_msg or "'>' not supported" in error_msg or "'<' not supported" in error_msg:
-                # Intentar sin sort_by como workaround
-                print(f"⚠️  Error con sort_by='{sort_by}', intentando sin sort_by...")
-                comment_generator = downloader.get_comments_from_url(full_url)
+            if "'>=' not supported" in error_msg or "'<=' not supported" in error_msg:
+                # Si falla sin sort_by, intentar con 'top' explícitamente
+                try:
+                    comment_generator = downloader.get_comments_from_url(full_url, sort_by='top')
+                except:
+                    raise RuntimeError(f"Error al extraer comentarios: {error_msg}")
             else:
                 raise
         
@@ -132,18 +134,29 @@ def extract_comments(video_url: str, max_comments: int = 100, sort_by: str = 'to
                     break
                 
                 # Convertir valores numéricos a int de forma segura
-                votes = comment.get('votes', 0)
-                reply_count = comment.get('reply_count', 0)
+                # Manejar None, strings vacíos, y valores inválidos
+                votes = comment.get('votes', 0) or 0
+                reply_count = comment.get('reply_count', 0) or 0
                 
-                # Convertir a int si es string o mantener como int
+                # Convertir a int de forma segura, manejando NoneType
                 try:
-                    likes = int(votes) if votes is not None and votes != '' else 0
-                except (ValueError, TypeError):
+                    if votes is None:
+                        likes = 0
+                    elif isinstance(votes, str):
+                        likes = int(votes) if votes.strip() else 0
+                    else:
+                        likes = int(votes)
+                except (ValueError, TypeError, AttributeError):
                     likes = 0
                 
                 try:
-                    reply_count_int = int(reply_count) if reply_count is not None and reply_count != '' else 0
-                except (ValueError, TypeError):
+                    if reply_count is None:
+                        reply_count_int = 0
+                    elif isinstance(reply_count, str):
+                        reply_count_int = int(reply_count) if reply_count.strip() else 0
+                    else:
+                        reply_count_int = int(reply_count)
+                except (ValueError, TypeError, AttributeError):
                     reply_count_int = 0
                 
                 comments.append({
