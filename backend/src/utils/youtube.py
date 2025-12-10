@@ -175,7 +175,7 @@ def extract_comments(video_url: str, max_comments: int = 100, sort_by: str = 'to
                 except (ValueError, TypeError, AttributeError):
                     reply_count_int = 0
                 
-            comments.append({
+                comments.append({
                     'comment_id': str(comment_id),
                     'text': str(text),
                     'author': str(comment.get('author', 'Unknown')),
