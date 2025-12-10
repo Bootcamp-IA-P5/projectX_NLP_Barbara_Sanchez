@@ -224,10 +224,10 @@ export function ModelComparison() {
         className="grid grid-cols-1 md:grid-cols-4 gap-4"
       >
         {[
-          { step: 1, title: 'Baseline', desc: '4 modelos clásicos', color: 'blue', icon: Zap },
-          { step: 2, title: 'Optimización', desc: 'Optuna tuning', color: 'purple', icon: Target },
-          { step: 3, title: 'Ensemble', desc: 'Voting & Stacking', color: 'orange', icon: Layers },
-          { step: 4, title: 'Transformers', desc: 'DistilBERT', color: 'pink', icon: Brain },
+          { step: 1, title: 'Baseline', desc: '4 modelos clásicos', gradient: 'from-blue-500 to-blue-600', icon: Zap },
+          { step: 2, title: 'Optimización', desc: 'Optuna tuning', gradient: 'from-purple-500 to-purple-600', icon: Target },
+          { step: 3, title: 'Ensemble', desc: 'Voting & Stacking', gradient: 'from-orange-500 to-orange-600', icon: Layers },
+          { step: 4, title: 'Transformers', desc: 'DistilBERT', gradient: 'from-pink-500 to-pink-600', icon: Brain },
         ].map((stage, idx) => {
           const Icon = stage.icon;
           return (
@@ -236,7 +236,7 @@ export function ModelComparison() {
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.1 + idx * 0.1 }}
-              className={`relative overflow-hidden bg-gradient-to-br from-${stage.color}-500 to-${stage.color}-600 rounded-xl shadow-lg p-6 text-white group hover:scale-105 transition-transform duration-300`}
+              className={`relative overflow-hidden bg-gradient-to-br ${stage.gradient} rounded-xl shadow-lg p-6 text-white group hover:scale-105 transition-transform duration-300`}
             >
               <div className="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full -mr-12 -mt-12"></div>
               <div className="relative z-10">
