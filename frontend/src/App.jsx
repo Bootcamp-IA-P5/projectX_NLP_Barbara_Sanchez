@@ -66,7 +66,7 @@ function App() {
                 : 'text-slate-600 hover:text-slate-900'
             }`}
           >
-            Comparativa
+            EDA
           </button>
           <button
             onClick={() => setActiveSection('stats')}
@@ -114,7 +114,7 @@ function App() {
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.3 }}
             >
-              <ModelInfo />
+              <ModelComparison />
             </motion.div>
           )}
 
@@ -126,7 +126,7 @@ function App() {
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.3 }}
             >
-              <ModelComparison />
+              <ModelInfo />
             </motion.div>
           )}
           
