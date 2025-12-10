@@ -49,16 +49,6 @@ function App() {
             Analizador
           </button>
           <button
-            onClick={() => setActiveSection('model')}
-            className={`px-6 py-3 transition-all whitespace-nowrap ${
-              activeSection === 'model'
-                ? 'border-b-2 border-red-500 text-red-600'
-                : 'text-slate-600 hover:text-slate-900'
-            }`}
-          >
-            Modelo
-          </button>
-          <button
             onClick={() => setActiveSection('comparison')}
             className={`px-6 py-3 transition-all whitespace-nowrap ${
               activeSection === 'comparison'
@@ -67,6 +57,16 @@ function App() {
             }`}
           >
             EDA
+          </button>
+          <button
+            onClick={() => setActiveSection('model')}
+            className={`px-6 py-3 transition-all whitespace-nowrap ${
+              activeSection === 'model'
+                ? 'border-b-2 border-red-500 text-red-600'
+                : 'text-slate-600 hover:text-slate-900'
+            }`}
+          >
+            Modelo
           </button>
           <button
             onClick={() => setActiveSection('stats')}
