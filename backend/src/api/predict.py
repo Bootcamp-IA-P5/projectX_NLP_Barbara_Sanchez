@@ -48,7 +48,20 @@ class HateSpeechPredictor:
             self.model = pickle.load(f)
         
         # Cargar vectorizador
-        self.vectorizer = TextVectorizer.load(self.vectorizer_path)
+        # El vectorizador puede ser un TextVectorizer completo o solo el vectorizador de sklearn
+        try:
+            with open(self.vectorizer_path, 'rb') as f:
+                loaded = pickle.load(f)
+            
+            # Si es un TextVectorizer completo, usarlo directamente
+            if isinstance(loaded, TextVectorizer):
+                self.vectorizer = loaded
+            # Si es solo el vectorizador de sklearn, crear un TextVectorizer wrapper
+            else:
+                self.vectorizer = TextVectorizer.load(self.vectorizer_path)
+        except Exception as e:
+            # Fallback: intentar cargar como TextVectorizer normal
+            self.vectorizer = TextVectorizer.load(self.vectorizer_path)
         
         # Inicializar preprocesador
         self.preprocessor = TextPreprocessor(use_spacy=True)
