@@ -76,26 +76,26 @@ class HateSpeechPredictor:
         probabilities = self.model.predict_proba(text_vectorized)[0]
         
         # AMPLIFICAR DIFERENCIAS EN PROBABILIDADES
-        # Aplicar transformación para hacer las probabilidades más extremas
+        # Aplicar transformación sigmoide para hacer las probabilidades más extremas
         # Esto hace que textos claramente tóxicos tengan prob > 0.6
         # y textos claramente no tóxicos tengan prob < 0.4
         prob_toxic_raw = float(probabilities[1])
-        prob_not_toxic_raw = float(probabilities[0])
         
-        # Transformación más agresiva: amplificar diferencias desde 0.5
-        # Factor de amplificación: 3.0 (hace diferencias más notables)
-        if prob_toxic_raw > 0.5:
-            # Amplificar hacia 1.0 (más tóxico)
-            # Si raw=0.51 -> amplificado = 0.5 + 0.01*3 = 0.53
-            # Si raw=0.55 -> amplificado = 0.5 + 0.05*3 = 0.65
-            prob_toxic = 0.5 + (prob_toxic_raw - 0.5) * 3.0
-            prob_toxic = min(prob_toxic, 0.90)  # Limitar a 0.90 máximo
-        else:
-            # Amplificar hacia 0.0 (menos tóxico)
-            # Si raw=0.49 -> amplificado = 0.5 - 0.01*3 = 0.47
-            # Si raw=0.45 -> amplificado = 0.5 - 0.05*3 = 0.35
-            prob_toxic = 0.5 - (0.5 - prob_toxic_raw) * 3.0
-            prob_toxic = max(prob_toxic, 0.10)  # Limitar a 0.10 mínimo
+        # Usar función sigmoide ajustada para amplificar diferencias
+        # Transformación: aplicar sigmoide con factor de escala
+        # Esto hace que valores cerca de 0.5 se separen más
+        
+        # Normalizar a rango [-1, 1] desde [0, 1]
+        normalized = (prob_toxic_raw - 0.5) * 2.0  # [-1, 1]
+        
+        # Aplicar sigmoide con factor de escala para amplificar
+        # Factor más alto = más amplificación
+        scale_factor = 4.0  # Ajustar este valor para más/menos amplificación
+        sigmoid_input = normalized * scale_factor
+        prob_toxic = 1.0 / (1.0 + math.exp(-sigmoid_input))
+        
+        # Asegurar rango razonable [0.15, 0.85] para evitar extremos
+        prob_toxic = max(0.15, min(0.85, prob_toxic))
         
         # Asegurar que sumen 1.0
         prob_not_toxic = 1.0 - prob_toxic
