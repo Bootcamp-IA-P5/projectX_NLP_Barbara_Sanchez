@@ -14,8 +14,8 @@ services:
     envVars:
       - key: PYTHONUNBUFFERED
         value: 1
-      - key: FRONTEND_URL
-        sync: false  # Se configurará manualmente después de desplegar frontend
+      # FRONTEND_URL se configurará manualmente después de desplegar frontend
+      # Por ahora dejar vacío o usar placeholder
     healthCheckPath: /health
     autoDeploy: true
 
@@ -29,8 +29,8 @@ services:
     region: oregon
     branch: develop
     envVars:
-      - key: VITE_API_URL
-        sync: false  # Se configurará manualmente con la URL del backend
+      # VITE_API_URL se configurará manualmente después de desplegar backend
+      # Por ahora dejar vacío o usar placeholder temporal
     healthCheckPath: /
     autoDeploy: true
 
