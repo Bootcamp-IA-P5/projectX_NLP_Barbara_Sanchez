@@ -142,6 +142,9 @@ def load_predictor(model_dir: Path = None) -> HateSpeechPredictor:
     """
     Cargar predictor con rutas por defecto.
     
+    Usa el modelo aumentado si está disponible (mejor rendimiento),
+    sino usa el modelo optimizado original.
+    
     Args:
         model_dir: Directorio donde están los modelos (opcional)
         
@@ -150,10 +153,27 @@ def load_predictor(model_dir: Path = None) -> HateSpeechPredictor:
     """
     if model_dir is None:
         backend_root = Path(__file__).parent.parent.parent
-        model_dir = backend_root / 'models' / 'optimized'
-    
-    model_path = model_dir / 'best_optimized_model.pkl'
-    vectorizer_path = model_dir.parent / 'tfidf_vectorizer.pkl'
+        # Intentar cargar modelo aumentado primero
+        augmented_dir = backend_root / 'models' / 'augmented'
+        optimized_dir = backend_root / 'models' / 'optimized'
+        
+        # Verificar si existe modelo aumentado
+        augmented_model_path = augmented_dir / 'svm_augmented_model.pkl'
+        augmented_vectorizer_path = augmented_dir / 'tfidf_vectorizer_augmented.pkl'
+        
+        if augmented_model_path.exists() and augmented_vectorizer_path.exists():
+            print("✅ Usando modelo aumentado (mejor rendimiento)")
+            model_path = augmented_model_path
+            vectorizer_path = augmented_vectorizer_path
+        else:
+            print("ℹ️  Modelo aumentado no encontrado, usando modelo optimizado original")
+            model_dir = optimized_dir
+            model_path = model_dir / 'best_optimized_model.pkl'
+            vectorizer_path = model_dir.parent / 'tfidf_vectorizer.pkl'
+    else:
+        # Si se especifica un directorio, usar ese
+        model_path = model_dir / 'best_optimized_model.pkl'
+        vectorizer_path = model_dir.parent / 'tfidf_vectorizer.pkl'
     
     if not model_path.exists():
         raise FileNotFoundError(f"Modelo no encontrado en {model_path}")
