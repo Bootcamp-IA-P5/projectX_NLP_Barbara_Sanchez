@@ -131,8 +131,8 @@ def extract_comments(video_url: str, max_comments: int = 100, sort_by: str = 'to
             try:
                 # Usar contador explícito en lugar de len() para evitar problemas
                 if comment_count >= max_comments:
-                    break
-                
+                break
+            
                 # IMPORTANTE: La librería devuelve campos diferentes:
                 # - 'cid' (no 'comment_id')
                 # - 'votes' es STRING (no int)
@@ -175,7 +175,7 @@ def extract_comments(video_url: str, max_comments: int = 100, sort_by: str = 'to
                 except (ValueError, TypeError, AttributeError):
                     reply_count_int = 0
                 
-                comments.append({
+            comments.append({
                     'comment_id': str(comment_id),
                     'text': str(text),
                     'author': str(comment.get('author', 'Unknown')),
@@ -307,7 +307,7 @@ def analyze_video_comments(
     
     print(f"📥 Extrayendo comentarios de: {video_url}")
     try:
-        comments = extract_comments(video_url, max_comments=max_comments, sort_by=sort_by)
+    comments = extract_comments(video_url, max_comments=max_comments, sort_by=sort_by)
     except RuntimeError as e:
         # Re-lanzar RuntimeError para que el endpoint lo capture
         raise
