@@ -307,7 +307,7 @@ def analyze_video_comments(
     
     print(f"📥 Extrayendo comentarios de: {video_url}")
     try:
-    comments = extract_comments(video_url, max_comments=max_comments, sort_by=sort_by)
+        comments = extract_comments(video_url, max_comments=max_comments, sort_by=sort_by)
     except RuntimeError as e:
         # Re-lanzar RuntimeError para que el endpoint lo capture
         raise
