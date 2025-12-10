@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import Dict, Any
 import numpy as np
 import pandas as pd
+import math
 
 # Imports relativos o absolutos
 try:
