@@ -77,26 +77,25 @@ class HateSpeechPredictor:
         probabilities = self.model.predict_proba(text_vectorized)[0]
         
         # AMPLIFICAR DIFERENCIAS EN PROBABILIDADES
-        # Aplicar transformación sigmoide para hacer las probabilidades más extremas
+        # Aplicar transformación para hacer las probabilidades más extremas y distinguibles
         # Esto hace que textos claramente tóxicos tengan prob > 0.6
         # y textos claramente no tóxicos tengan prob < 0.4
         prob_toxic_raw = float(probabilities[1])
         
-        # Usar función sigmoide ajustada para amplificar diferencias
-        # Transformación: aplicar sigmoide con factor de escala
-        # Esto hace que valores cerca de 0.5 se separen más
-        
-        # Normalizar a rango [-1, 1] desde [0, 1]
-        normalized = (prob_toxic_raw - 0.5) * 2.0  # [-1, 1]
-        
-        # Aplicar sigmoide con factor de escala para amplificar
-        # Factor más alto = más amplificación
-        scale_factor = 4.0  # Ajustar este valor para más/menos amplificación
-        sigmoid_input = normalized * scale_factor
-        prob_toxic = 1.0 / (1.0 + math.exp(-sigmoid_input))
-        
-        # Asegurar rango razonable [0.15, 0.85] para evitar extremos
-        prob_toxic = max(0.15, min(0.85, prob_toxic))
+        # Transformación más agresiva: amplificar diferencias desde 0.5
+        # Usar función power para amplificar más las diferencias
+        if prob_toxic_raw > 0.5:
+            # Si es tóxico, amplificar hacia 1.0
+            # Ejemplo: 0.51 -> 0.53, 0.55 -> 0.70, 0.60 -> 0.85
+            diff = prob_toxic_raw - 0.5
+            prob_toxic = 0.5 + (diff ** 0.5) * 2.5  # Raíz cuadrada amplifica más
+            prob_toxic = min(prob_toxic, 0.80)  # Limitar a 0.80 máximo
+        else:
+            # Si no es tóxico, amplificar hacia 0.0
+            # Ejemplo: 0.49 -> 0.47, 0.45 -> 0.30, 0.40 -> 0.20
+            diff = 0.5 - prob_toxic_raw
+            prob_toxic = 0.5 - (diff ** 0.5) * 2.5  # Raíz cuadrada amplifica más
+            prob_toxic = max(prob_toxic, 0.20)  # Limitar a 0.20 mínimo
         
         # Asegurar que sumen 1.0
         prob_not_toxic = 1.0 - prob_toxic
