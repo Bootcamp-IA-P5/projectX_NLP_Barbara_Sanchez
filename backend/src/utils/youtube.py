@@ -131,7 +131,7 @@ def extract_comments(video_url: str, max_comments: int = 100, sort_by: str = 'to
             try:
                 # Usar contador explícito en lugar de len() para evitar problemas
                 if comment_count >= max_comments:
-                break
+                    break
             
                 # IMPORTANTE: La librería devuelve campos diferentes:
                 # - 'cid' (no 'comment_id')
