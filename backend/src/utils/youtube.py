@@ -230,11 +230,6 @@ def analyze_video_comments(
     max_comments: int = 100,
     sort_by: str = 'top'
 ) -> pd.DataFrame:
-    # Asegurar que max_comments sea int
-    try:
-        max_comments = int(max_comments)
-    except (ValueError, TypeError):
-        max_comments = 100
     """
     Extraer y analizar comentarios de un video de YouTube.
     
@@ -246,9 +241,27 @@ def analyze_video_comments(
         
     Returns:
         DataFrame con comentarios y predicciones
+        
+    Raises:
+        RuntimeError: Si hay error al extraer comentarios
     """
+    # Asegurar que max_comments sea int
+    try:
+        max_comments = int(max_comments)
+    except (ValueError, TypeError):
+        max_comments = 20  # Default más conservador
+    
     print(f"📥 Extrayendo comentarios de: {video_url}")
-    comments = extract_comments(video_url, max_comments=max_comments, sort_by=sort_by)
+    try:
+        comments = extract_comments(video_url, max_comments=max_comments, sort_by=sort_by)
+    except RuntimeError as e:
+        # Re-lanzar RuntimeError para que el endpoint lo capture
+        raise
+    except Exception as e:
+        # Cualquier otro error se convierte en RuntimeError
+        error_msg = str(e)
+        print(f"❌ Error inesperado al extraer comentarios: {error_msg}")
+        raise RuntimeError(f"Error al extraer comentarios: {error_msg}")
     
     if not comments:
         print("⚠️  No se encontraron comentarios")
