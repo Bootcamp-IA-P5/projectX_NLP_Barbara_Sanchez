@@ -18,10 +18,30 @@ const apiClient = axios.create({
  */
 export const analyzeText = async (text) => {
   try {
-    const response = await apiClient.post('/predict', { text });
+    // Asegurar que el texto se envía correctamente
+    const textToSend = String(text).trim();
+    
+    if (!textToSend) {
+      throw new Error('El texto no puede estar vacío');
+    }
+    
+    console.log('Enviando a API:', { text: textToSend });
+    
+    const response = await apiClient.post('/predict', { 
+      text: textToSend 
+    });
+    
+    console.log('Respuesta de API:', response.data);
+    
+    // Verificar que la respuesta tiene el formato correcto
+    if (!response.data || typeof response.data !== 'object') {
+      throw new Error('Respuesta inválida del servidor');
+    }
+    
     return response.data;
   } catch (error) {
-    throw new Error(error.response?.data?.detail || 'Error al analizar el texto');
+    console.error('Error en analyzeText:', error);
+    throw new Error(error.response?.data?.detail || error.message || 'Error al analizar el texto');
   }
 };
 
