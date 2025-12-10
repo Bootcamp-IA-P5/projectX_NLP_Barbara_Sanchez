@@ -22,6 +22,8 @@ Sistema completo de detección automática de mensajes de odio en comentarios de
 - [Despliegue](#-despliegue)
 - [Estructura del Proyecto](#-estructura-del-proyecto)
 - [Tecnologías](#-tecnologías)
+- [Gestión de Proyecto](#-gestión-de-proyecto)
+- [Estrategia de Ramas Git](#-estrategia-de-ramas-git)
 - [Contribución](#-contribución)
 - [Licencia](#-licencia)
 
@@ -609,6 +611,30 @@ pytest tests/ --cov=src --cov-report=html
 
 ---
 
+## 📋 Gestión de Proyecto
+
+Este proyecto utiliza **Trello** para la organización y seguimiento de tareas:
+
+- **📊 Tablero de Trello**: [Ver tablero del proyecto](https://trello.com/invite/b/6939d128467ef63544f83c76/ATTIae8fbebe18095457332d20f9a128a76a0F590DBC/nlp)
+
+El tablero incluye:
+- ✅ Organización de tareas por niveles (Esencial, Medio, Avanzado, Experto)
+- ✅ Seguimiento de progreso del proyecto
+- ✅ Priorización de features
+- ✅ Gestión de sprints y milestones
+
+## 🌿 Estrategia de Ramas Git
+
+- **`main`**: Código estable y funcional
+- **`develop`**: Rama de desarrollo principal
+- **`feat/*`**: Ramas de features individuales
+
+### Convenciones
+
+- **Commits**: Usar prefijos (feat, fix, docs, style, refactor, test, chore)
+- **Ramas**: `feat/*`, `fix/*`, `docs/*`
+- **Código**: Seguir PEP 8 (Python) y ESLint (JavaScript)
+
 ## 🤝 Contribución
 
 Las contribuciones son bienvenidas. Por favor:
@@ -618,12 +644,6 @@ Las contribuciones son bienvenidas. Por favor:
 3. Commit tus cambios (`git commit -m 'feat: Add some AmazingFeature'`)
 4. Push a la rama (`git push origin feat/AmazingFeature`)
 5. Abre un Pull Request
-
-### Convenciones
-
-- **Commits**: Usar prefijos (feat, fix, docs, style, refactor, test, chore)
-- **Ramas**: `feat/*`, `fix/*`, `docs/*`
-- **Código**: Seguir PEP 8 (Python) y ESLint (JavaScript)
 
 ---
 
