@@ -329,12 +329,25 @@ async def analyze_youtube_video(request: YouTubeVideoRequest):
             raise HTTPException(status_code=400, detail="No se pudo extraer el ID del video de la URL")
         
         # Analizar comentarios
-        df = analyze_video_comments(
-            request.video_url,
-            predictor,
-            max_comments=request.max_comments,
-            sort_by=request.sort_by
-        )
+        try:
+            df = analyze_video_comments(
+                request.video_url,
+                predictor,
+                max_comments=request.max_comments,
+                sort_by=request.sort_by
+            )
+        except RuntimeError as e:
+            # Error específico de extracción de comentarios
+            error_msg = str(e)
+            print(f"❌ Error al analizar video: {error_msg}")
+            raise HTTPException(status_code=400, detail=error_msg)
+        except Exception as e:
+            # Otro tipo de error
+            error_msg = str(e)
+            print(f"❌ Error inesperado al analizar video: {error_msg}")
+            import traceback
+            traceback.print_exc()
+            raise HTTPException(status_code=500, detail=f"Error al analizar video: {error_msg}")
         
         if df.empty:
             raise HTTPException(status_code=404, detail="No se encontraron comentarios en el video")

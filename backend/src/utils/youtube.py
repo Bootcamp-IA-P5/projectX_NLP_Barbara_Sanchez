@@ -72,6 +72,14 @@ def extract_comments(video_url: str, max_comments: int = 100, sort_by: str = 'to
         ImportError: Si youtube-comment-downloader no está instalado
         ValueError: Si no se puede extraer el ID del video
     """
+    # Asegurar que max_comments sea int y limitarlo
+    try:
+        max_comments = int(max_comments)
+        # Limitar a un máximo razonable para evitar problemas con la librería
+        max_comments = min(max_comments, 50)  # Reducir límite a 50
+    except (ValueError, TypeError):
+        max_comments = 20  # Default más conservador
+    
     if not YOUTUBE_DOWNLOADER_AVAILABLE:
         raise ImportError(
             "youtube-comment-downloader no está instalado. "
@@ -83,29 +91,119 @@ def extract_comments(video_url: str, max_comments: int = 100, sort_by: str = 'to
     if not video_id:
         raise ValueError(f"No se pudo extraer el ID del video de la URL: {video_url}")
     
+    # Validar sort_by - asegurar que sea string válido
+    valid_sort_options = ['top', 'time', 'relevance']
+    if sort_by not in valid_sort_options:
+        sort_by = 'top'
+    sort_by = str(sort_by).lower()  # Asegurar lowercase y string
+    
     # Inicializar downloader
     downloader = YoutubeCommentDownloader()
     
     # Extraer comentarios
     comments = []
+    comment_count = 0  # Contador explícito para evitar problemas de tipo
+    
     try:
-        for comment in downloader.get_comments_from_url(
-            f"https://www.youtube.com/watch?v={video_id}",
-            sort_by=sort_by
-        ):
-            if len(comments) >= max_comments:
-                break
+        # Construir URL completa
+        full_url = f"https://www.youtube.com/watch?v={video_id}"
+        
+        # Intentar obtener comentarios con manejo de errores más específico
+        # El error puede ocurrir al crear el generador o al iterar sobre él
+        try:
+            comment_generator = downloader.get_comments_from_url(
+                full_url,
+                sort_by=sort_by
+            )
+        except (TypeError, ValueError) as e:
+            error_msg = str(e)
+            if "'>=' not supported" in error_msg or "'<=' not supported" in error_msg or "'>' not supported" in error_msg or "'<' not supported" in error_msg:
+                # Intentar sin sort_by como workaround
+                print(f"⚠️  Error con sort_by='{sort_by}', intentando sin sort_by...")
+                comment_generator = downloader.get_comments_from_url(full_url)
+            else:
+                raise
+        
+        # Iterar sobre los comentarios con manejo de errores
+        for comment in comment_generator:
+            try:
+                # Usar contador explícito en lugar de len() para evitar problemas
+                if comment_count >= max_comments:
+                    break
+                
+                # Convertir valores numéricos a int de forma segura
+                votes = comment.get('votes', 0)
+                reply_count = comment.get('reply_count', 0)
+                
+                # Convertir a int si es string o mantener como int
+                try:
+                    likes = int(votes) if votes is not None and votes != '' else 0
+                except (ValueError, TypeError):
+                    likes = 0
+                
+                try:
+                    reply_count_int = int(reply_count) if reply_count is not None and reply_count != '' else 0
+                except (ValueError, TypeError):
+                    reply_count_int = 0
+                
+                comments.append({
+                    'comment_id': str(comment.get('comment_id', '')),
+                    'text': str(comment.get('text', '')),
+                    'author': str(comment.get('author', '')),
+                    'likes': likes,
+                    'time': str(comment.get('time', '')),
+                    'reply_count': reply_count_int
+                })
+                
+                comment_count += 1
+                
+            except (TypeError, ValueError) as e:
+                # Error al procesar un comentario individual - continuar con el siguiente
+                error_msg = str(e)
+                if "'>=' not supported" in error_msg or "'<=' not supported" in error_msg:
+                    # Si es un error de tipo, puede ser un problema con este comentario específico
+                    print(f"⚠️  Error procesando comentario {comment_count + 1}, saltando...")
+                    continue
+                else:
+                    # Otro tipo de error - re-lanzar
+                    raise
             
-            comments.append({
-                'comment_id': comment.get('comment_id', ''),
-                'text': comment.get('text', ''),
-                'author': comment.get('author', ''),
-                'likes': comment.get('votes', 0),
-                'time': comment.get('time', ''),
-                'reply_count': comment.get('reply_count', 0)
-            })
-    except Exception as e:
+    except TypeError as e:
+        # Error específico de comparación de tipos - puede ser un bug de la librería
+        error_msg = str(e)
+        if "'>=' not supported" in error_msg or "'<=' not supported" in error_msg or "'>' not supported" in error_msg or "'<' not supported" in error_msg:
+            # Intentar sin sort_by primero
+            if sort_by != 'top':
+                print(f"⚠️  Error con sort_by='{sort_by}', intentando sin sort_by...")
+                try:
+                    return extract_comments(video_url, max_comments=max_comments, sort_by='top')
+                except:
+                    pass
+            # Si eso no funciona, intentar con menos comentarios
+            if max_comments > 10:
+                print(f"⚠️  Error con {max_comments} comentarios, intentando con 10...")
+                return extract_comments(video_url, max_comments=10, sort_by='top')
+            raise RuntimeError(
+                f"Error de tipo en la librería de YouTube. "
+                f"Intenta con menos comentarios (máximo 10) o verifica la URL. Error: {error_msg}"
+            )
         raise RuntimeError(f"Error al extraer comentarios: {e}")
+    except Exception as e:
+        error_msg = str(e)
+        # Si es un error de tipo similar, intentar con menos comentarios
+        if "'>=' not supported" in error_msg or "'<=' not supported" in error_msg or "'>' not supported" in error_msg or "'<' not supported" in error_msg:
+            # Intentar sin sort_by primero
+            if sort_by != 'top':
+                print(f"⚠️  Error con sort_by='{sort_by}', intentando sin sort_by...")
+                try:
+                    return extract_comments(video_url, max_comments=max_comments, sort_by='top')
+                except:
+                    pass
+            # Si eso no funciona, intentar con menos comentarios
+            if max_comments > 10:
+                print(f"⚠️  Error con {max_comments} comentarios, intentando con 10...")
+                return extract_comments(video_url, max_comments=10, sort_by='top')
+        raise RuntimeError(f"Error al extraer comentarios: {error_msg}")
     
     return comments
 
@@ -143,9 +241,27 @@ def analyze_video_comments(
         
     Returns:
         DataFrame con comentarios y predicciones
+        
+    Raises:
+        RuntimeError: Si hay error al extraer comentarios
     """
+    # Asegurar que max_comments sea int
+    try:
+        max_comments = int(max_comments)
+    except (ValueError, TypeError):
+        max_comments = 20  # Default más conservador
+    
     print(f"📥 Extrayendo comentarios de: {video_url}")
-    comments = extract_comments(video_url, max_comments=max_comments, sort_by=sort_by)
+    try:
+        comments = extract_comments(video_url, max_comments=max_comments, sort_by=sort_by)
+    except RuntimeError as e:
+        # Re-lanzar RuntimeError para que el endpoint lo capture
+        raise
+    except Exception as e:
+        # Cualquier otro error se convierte en RuntimeError
+        error_msg = str(e)
+        print(f"❌ Error inesperado al extraer comentarios: {error_msg}")
+        raise RuntimeError(f"Error al extraer comentarios: {error_msg}")
     
     if not comments:
         print("⚠️  No se encontraron comentarios")
@@ -166,6 +282,7 @@ def analyze_video_comments(
                 'is_toxic': result['is_toxic'],
                 'toxicity_label': result['toxicity_label'],
                 'probability_toxic': result['probability_toxic'],
+                'probability_not_toxic': result.get('probability_not_toxic', 1.0 - result['probability_toxic']),
                 'confidence': result['confidence']
             })
         except Exception as e:
