@@ -1,7 +1,9 @@
 import axios from 'axios';
 
 // URL base de la API (backend)
-const API_BASE_URL = 'http://localhost:8000';
+// En desarrollo: localhost:8000
+// En producción: usar variable de entorno o URL del backend desplegado
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
 // Crear instancia de axios con configuración por defecto
 const apiClient = axios.create({

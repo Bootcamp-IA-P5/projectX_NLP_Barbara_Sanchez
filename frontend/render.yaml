@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: hate-speech-frontend
+    env: docker
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    plan: free
+    region: oregon
+    envVars:
+      - key: VITE_API_URL
+        sync: false  # Se configurará manualmente en Render con la URL del backend
+    healthCheckPath: /
+    autoDeploy: true
+
