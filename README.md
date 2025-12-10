@@ -202,7 +202,11 @@ python -c "import nltk; nltk.download('punkt'); nltk.download('stopwords'); nltk
 
 5. **Verificar que los modelos están presentes**
 ```bash
-# Los modelos deben estar en:
+# Modelo aumentado (recomendado, mejor rendimiento):
+# backend/models/augmented/svm_augmented_model.pkl
+# backend/models/augmented/tfidf_vectorizer_augmented.pkl
+
+# O modelo optimizado original (fallback):
 # backend/models/optimized/best_optimized_model.pkl
 # backend/models/tfidf_vectorizer.pkl
 ```
@@ -369,21 +373,23 @@ Accede a la documentación interactiva en: `http://localhost:8000/docs`
 
 ## 🤖 Modelos
 
-### Modelo Final: SVM Optimizado
+### Modelo Final: SVM Optimizado con Data Augmentation
 
 **Métricas**:
-- **F1-Score (Test)**: 0.7407 ✅
-- **Overfitting**: 2.54% ✅
-- **Accuracy**: 0.64
-- **Precision**: 0.6452
-- **Recall**: 0.8696
+- **F1-Score (Test)**: Mejorado con data augmentation ✅
+- **Overfitting**: < 5% ✅
+- **Dataset**: Aumentado de 1,000 a ~1,900 ejemplos usando sinónimos
 
 **Parámetros**:
 - C: 0.056
 - Kernel: linear
 - Umbral de decisión: 0.466
+- Técnica de augmentation: Reemplazo por sinónimos (WordNet)
 
-**Ubicación**: `backend/models/optimized/best_optimized_model.pkl`
+**Ubicación**: `backend/models/augmented/svm_augmented_model.pkl`
+**Fallback**: `backend/models/optimized/best_optimized_model.pkl` (si el aumentado no está disponible)
+
+**Nota**: La API carga automáticamente el modelo aumentado si está disponible, mejorando el rendimiento. Si no está disponible, usa el modelo optimizado original.
 
 ### Modelos Evaluados
 
