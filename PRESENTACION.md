@@ -102,7 +102,11 @@ Desarrollar un sistema automatizado de detección de hate speech en comentarios 
 
 ## 📊 SLIDE 6: Modelo Final Seleccionado
 
-### SVM Optimizado - Métricas Finales
+### 🏆 SVM Optimizado - El Mejor Balance
+
+**⚠️ IMPORTANTE**: El modelo seleccionado es **SVM Optimizado**, NO ensemble ni DistilBERT.
+
+### Métricas Finales
 
 | Métrica | Valor | Objetivo | Estado |
 |---------|-------|----------|--------|
@@ -112,6 +116,12 @@ Desarrollar un sistema automatizado de detección de hate speech en comentarios 
 | **Precision** | **0.6452** | - | - |
 | **Recall** | **0.8696** | - | - |
 | **Overfitting** | **2.54%** | < 5% | ✅ Cumple |
+
+### ¿Por qué SVM y NO otros modelos?
+- ✅ **Único modelo que cumple overfitting < 5%** (2.54%)
+- ✅ **Mejor F1-score** que todos (0.7407)
+- ✅ **Modelo ligero** (5 MB) y rápido para producción
+- ✅ **Balance óptimo** precision-recall
 
 ### Matriz de Confusión
 
@@ -130,25 +140,31 @@ Tóxico           12       80
 
 ---
 
-## 📊 SLIDE 7: Modelos Ensemble Evaluados
+## 📊 SLIDE 7: Modelos Ensemble Evaluados (NO Seleccionados)
+
+### ⚠️ IMPORTANTE: Los ensembles NO fueron seleccionados
 
 ### Voting Classifier (Soft Voting)
-- **F1-Score (Test)**: 0.4651
-- **Overfitting**: 28.04% ❌
-- **Resultado**: No mejora vs modelo individual
+- **F1-Score (Test)**: **0.4651** ❌ (MUY BAJO, peor que baseline)
+- **Overfitting**: **28.04%** ❌ (MUY ALTO)
+- **Resultado**: **Empeora** el rendimiento significativamente
 
 ### Stacking Classifier
-- **F1-Score (Test)**: 0.6784
-- **Overfitting**: 16.15% ❌
-- **Resultado**: Mejora F1 pero overfitting alto
+- **F1-Score (Test)**: **0.6784** ❌ (peor que SVM 0.7407)
+- **Overfitting**: **16.15%** ❌ (muy alto, objetivo < 5%)
+- **Resultado**: No mejora y tiene overfitting alto
 
 ### Conclusión
-- ❌ Los ensembles **no mejoran** el modelo individual optimizado
-- ✅ El SVM optimizado sigue siendo el mejor
+- ❌ **Voting**: F1=0.4651, Overfitting=28.04% → **EMPEORA**
+- ❌ **Stacking**: F1=0.6784, Overfitting=16.15% → **NO MEJORA**
+- ✅ **SVM Optimizado**: F1=0.7407, Overfitting=2.54% → **MEJOR OPCIÓN**
+- ✅ El SVM optimizado **supera a todos los ensembles**
 
 ---
 
-## 📊 SLIDE 8: Modelo Transformer (DistilBERT)
+## 📊 SLIDE 8: Modelo Transformer (DistilBERT) - NO Seleccionado
+
+### ⚠️ IMPORTANTE: DistilBERT NO fue seleccionado como modelo final
 
 ### Configuración
 - **Modelo base**: distilbert-base-uncased
@@ -163,14 +179,27 @@ Tóxico           12       80
 |---------|-------|----------|--------|
 | **F1-Score (Test)** | 0.7027 | > 0.55 | ✅ Cumple |
 | **Accuracy** | 0.70 | - | - |
-| **Overfitting** | **24.41%** | < 6% | ❌ No cumple |
+| **Precision** | ~0.70 | - | - |
+| **Overfitting** | **24.41%** | < 6% | ❌ **NO CUMPLE** |
 
-### ¿Por qué NO se seleccionó DistilBERT?
-1. ❌ **Overfitting alto** (24.41% > 6%)
-2. ❌ **Modelo pesado** (255 MB vs 5 MB del SVM)
-3. ❌ **Dataset pequeño** (1,000 ejemplos no suficientes para transformers)
-4. ❌ **F1-score similar** (0.7027 vs 0.7407 del SVM)
-5. ❌ **Tiempo de inferencia** más lento
+### ❌ ¿Por qué NO se seleccionó DistilBERT?
+
+1. ❌ **Overfitting MUY ALTO**: **24.41%** (objetivo < 6%, tiene 4x más)
+2. ❌ **F1-Score PEOR**: 0.7027 vs **0.7407 del SVM** (SVM es mejor)
+3. ❌ **Modelo pesado**: 255 MB vs 5 MB del SVM (50x más pesado)
+4. ❌ **Dataset pequeño**: 1,000 ejemplos insuficientes para transformers
+5. ❌ **Tiempo de inferencia**: Más lento que SVM
+6. ❌ **NO cumple objetivo principal**: Overfitting < 5%
+
+### ✅ Comparación Directa
+
+| Aspecto | DistilBERT | SVM Optimizado | Ganador |
+|---------|------------|----------------|---------|
+| F1-Score | 0.7027 | **0.7407** | ✅ SVM |
+| Overfitting | **24.41%** | **2.54%** | ✅ SVM |
+| Tamaño | 255 MB | 5 MB | ✅ SVM |
+| Velocidad | Lento | Rápido | ✅ SVM |
+| Cumple objetivo | ❌ | ✅ | ✅ SVM |
 
 ---
 
@@ -319,6 +348,8 @@ Resultado: % tóxicos, lista de comentarios tóxicos, estadísticas
 
 ## 📊 SLIDE 16: Resultados Finales
 
+### 🏆 Modelo Final: SVM Optimizado (NO Ensemble, NO DistilBERT)
+
 ### Objetivos Cumplidos ✅
 
 | Objetivo | Valor Obtenido | Objetivo | Estado |
@@ -327,6 +358,11 @@ Resultado: % tóxicos, lista de comentarios tóxicos, estadísticas
 | **Overfitting** | **2.54%** | < 5% | ✅ |
 | **Precision** | **0.6452** | - | ✅ |
 | **Recall** | **0.8696** | - | ✅ |
+
+### ⚠️ Métricas INCORRECTAS que NO usar:
+- ❌ F1-score de 0.92 (no existe en nuestro proyecto)
+- ❌ Ensemble como modelo final (ensembles fueron peores)
+- ❌ DistilBERT con precisión 94% (DistilBERT NO fue seleccionado)
 
 ### Mejoras Logradas
 - ✅ **Reducción de overfitting**: 18.50% → 2.54% (-86.3%)
