@@ -172,10 +172,17 @@ def extract_comments(video_url: str, max_comments: int = 100, sort_by: str = 'to
         # Error específico de comparación de tipos - puede ser un bug de la librería
         error_msg = str(e)
         if "'>=' not supported" in error_msg or "'<=' not supported" in error_msg or "'>' not supported" in error_msg or "'<' not supported" in error_msg:
-            # Intentar con menos comentarios como workaround
+            # Intentar sin sort_by primero
+            if sort_by != 'top':
+                print(f"⚠️  Error con sort_by='{sort_by}', intentando sin sort_by...")
+                try:
+                    return extract_comments(video_url, max_comments=max_comments, sort_by='top')
+                except:
+                    pass
+            # Si eso no funciona, intentar con menos comentarios
             if max_comments > 10:
                 print(f"⚠️  Error con {max_comments} comentarios, intentando con 10...")
-                return extract_comments(video_url, max_comments=10, sort_by=sort_by)
+                return extract_comments(video_url, max_comments=10, sort_by='top')
             raise RuntimeError(
                 f"Error de tipo en la librería de YouTube. "
                 f"Intenta con menos comentarios (máximo 10) o verifica la URL. Error: {error_msg}"
@@ -184,10 +191,18 @@ def extract_comments(video_url: str, max_comments: int = 100, sort_by: str = 'to
     except Exception as e:
         error_msg = str(e)
         # Si es un error de tipo similar, intentar con menos comentarios
-        if "'>=' not supported" in error_msg or "'<=' not supported" in error_msg:
+        if "'>=' not supported" in error_msg or "'<=' not supported" in error_msg or "'>' not supported" in error_msg or "'<' not supported" in error_msg:
+            # Intentar sin sort_by primero
+            if sort_by != 'top':
+                print(f"⚠️  Error con sort_by='{sort_by}', intentando sin sort_by...")
+                try:
+                    return extract_comments(video_url, max_comments=max_comments, sort_by='top')
+                except:
+                    pass
+            # Si eso no funciona, intentar con menos comentarios
             if max_comments > 10:
                 print(f"⚠️  Error con {max_comments} comentarios, intentando con 10...")
-                return extract_comments(video_url, max_comments=10, sort_by=sort_by)
+                return extract_comments(video_url, max_comments=10, sort_by='top')
         raise RuntimeError(f"Error al extraer comentarios: {error_msg}")
     
     return comments
