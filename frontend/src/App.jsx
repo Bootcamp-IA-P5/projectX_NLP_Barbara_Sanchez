@@ -4,6 +4,7 @@ import { Hero } from './components/Hero';
 import { AnalysisForm } from './components/AnalysisForm';
 import { Results } from './components/Results';
 import { ModelInfo } from './components/ModelInfo';
+import { ModelComparison } from './components/ModelComparison';
 import { Statistics } from './components/Statistics';
 import { MLflowMetrics } from './components/MLflowMetrics';
 import { ModelComparison } from './components/ModelComparison';
@@ -25,7 +26,7 @@ import { ModelComparison } from './components/ModelComparison';
 
 function App() {
   const [results, setResults] = useState([]);
-  const [activeSection, setActiveSection] = useState('analyzer'); // 'analyzer' | 'model' | 'stats' | 'mlflow'
+  const [activeSection, setActiveSection] = useState('analyzer'); // 'analyzer' | 'model' | 'comparison' | 'stats' | 'mlflow'
 
   const handleAnalysis = (newResults) => {
     setResults(newResults);
@@ -57,6 +58,16 @@ function App() {
             }`}
           >
             Modelo
+          </button>
+          <button
+            onClick={() => setActiveSection('comparison')}
+            className={`px-6 py-3 transition-all whitespace-nowrap ${
+              activeSection === 'comparison'
+                ? 'border-b-2 border-red-500 text-red-600'
+                : 'text-slate-600 hover:text-slate-900'
+            }`}
+          >
+            Comparativa
           </button>
           <button
             onClick={() => setActiveSection('stats')}
@@ -105,6 +116,18 @@ function App() {
               transition={{ duration: 0.3 }}
             >
               <ModelInfo />
+            </motion.div>
+          )}
+
+          {activeSection === 'comparison' && (
+            <motion.div
+              key="comparison"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.3 }}
+            >
+              <ModelComparison />
             </motion.div>
           )}
           
