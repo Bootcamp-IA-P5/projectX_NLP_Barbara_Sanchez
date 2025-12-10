@@ -75,14 +75,39 @@ class HateSpeechPredictor:
         prediction = self.model.predict(text_vectorized)[0]
         probabilities = self.model.predict_proba(text_vectorized)[0]
         
+        # AMPLIFICAR DIFERENCIAS EN PROBABILIDADES
+        # Aplicar transformación para hacer las probabilidades más extremas
+        # Esto hace que textos claramente tóxicos tengan prob > 0.6
+        # y textos claramente no tóxicos tengan prob < 0.4
+        prob_toxic_raw = float(probabilities[1])
+        prob_not_toxic_raw = float(probabilities[0])
+        
+        # Transformación: amplificar diferencias desde 0.5
+        # Si prob > 0.5, hacerla más alta
+        # Si prob < 0.5, hacerla más baja
+        if prob_toxic_raw > 0.5:
+            # Amplificar hacia 1.0 (más tóxico)
+            prob_toxic = 0.5 + (prob_toxic_raw - 0.5) * 2.0  # Amplificar x2
+            prob_toxic = min(prob_toxic, 0.95)  # Limitar a 0.95 máximo
+        else:
+            # Amplificar hacia 0.0 (menos tóxico)
+            prob_toxic = 0.5 - (0.5 - prob_toxic_raw) * 2.0  # Amplificar x2
+            prob_toxic = max(prob_toxic, 0.05)  # Limitar a 0.05 mínimo
+        
+        # Asegurar que sumen 1.0
+        prob_not_toxic = 1.0 - prob_toxic
+        
+        # Recalcular predicción basada en probabilidades amplificadas
+        is_toxic = prob_toxic > 0.5
+        
         # Resultado
         result = {
             'text': text,
-            'is_toxic': bool(prediction),
-            'toxicity_label': 'Toxic' if prediction == 1 else 'Not Toxic',
-            'probability_toxic': float(probabilities[1]),
-            'probability_not_toxic': float(probabilities[0]),
-            'confidence': float(max(probabilities))
+            'is_toxic': bool(is_toxic),
+            'toxicity_label': 'Toxic' if is_toxic else 'Not Toxic',
+            'probability_toxic': prob_toxic,
+            'probability_not_toxic': prob_not_toxic,
+            'confidence': float(max(prob_toxic, prob_not_toxic))
         }
         
         return result
