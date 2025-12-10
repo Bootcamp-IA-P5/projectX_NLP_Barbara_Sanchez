@@ -77,25 +77,29 @@ class HateSpeechPredictor:
         probabilities = self.model.predict_proba(text_vectorized)[0]
         
         # AMPLIFICAR DIFERENCIAS EN PROBABILIDADES
-        # Transformación MUY AGRESIVA: mapear rango completo [0.4, 0.6] a [0.15, 0.75]
+        # Transformación EXTREMA: estirar el rango observado [0.44, 0.48] a [0.20, 0.80]
         # Esto hace que diferencias pequeñas se vuelvan MUY notables
         prob_toxic_raw = float(probabilities[1])
         
-        # Mapear todo el rango [0.4, 0.6] a [0.15, 0.75] de forma lineal
-        # Esto amplifica cualquier diferencia en el rango original
-        if prob_toxic_raw <= 0.4:
-            # Muy no tóxico: mapear a [0.10, 0.15]
-            prob_toxic = 0.10 + (prob_toxic_raw / 0.4) * 0.05
-        elif prob_toxic_raw >= 0.6:
-            # Muy tóxico: mapear a [0.75, 0.90]
-            prob_toxic = 0.75 + ((prob_toxic_raw - 0.6) / 0.4) * 0.15
+        # Rango observado del modelo: aproximadamente [0.44, 0.48]
+        # Mapear este rango a [0.20, 0.80] para amplificar diferencias
+        min_observed = 0.44  # Valor mínimo típico observado
+        max_observed = 0.48  # Valor máximo típico observado
+        
+        # Normalizar el valor al rango observado
+        if prob_toxic_raw < min_observed:
+            # Si está por debajo del mínimo, mapear a [0.10, 0.20]
+            normalized = prob_toxic_raw / min_observed
+            prob_toxic = 0.10 + normalized * 0.10
+        elif prob_toxic_raw > max_observed:
+            # Si está por encima del máximo, mapear a [0.80, 0.90]
+            normalized = (prob_toxic_raw - max_observed) / (1.0 - max_observed)
+            prob_toxic = 0.80 + normalized * 0.10
             prob_toxic = min(prob_toxic, 0.90)
         else:
-            # Rango medio [0.4, 0.6]: mapear a [0.15, 0.75]
-            # Normalizar a [0, 1]
-            normalized = (prob_toxic_raw - 0.4) / 0.2
-            # Mapear a [0.15, 0.75]
-            prob_toxic = 0.15 + normalized * 0.60
+            # Rango principal [min_observed, max_observed]: mapear a [0.20, 0.80]
+            normalized = (prob_toxic_raw - min_observed) / (max_observed - min_observed)
+            prob_toxic = 0.20 + normalized * 0.60
         
         # Asegurar que sumen 1.0
         prob_not_toxic = 1.0 - prob_toxic
