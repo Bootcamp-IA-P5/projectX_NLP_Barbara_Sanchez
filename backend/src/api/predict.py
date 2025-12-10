@@ -81,6 +81,19 @@ class HateSpeechPredictor:
         # Vectorizar
         text_vectorized = self.vectorizer.transform(pd.Series([processed_text]))
         
+        # Asegurar que es un array numpy denso con forma correcta
+        # El método transform ya devuelve un array denso, pero verificar
+        if hasattr(text_vectorized, 'toarray'):
+            # Si es sparse, convertir a denso
+            text_vectorized = text_vectorized.toarray()
+        elif not isinstance(text_vectorized, np.ndarray):
+            # Si no es array, convertir
+            text_vectorized = np.array(text_vectorized)
+        
+        # Asegurar que es 2D (1 fila, N features) para el modelo
+        if text_vectorized.ndim == 1:
+            text_vectorized = text_vectorized.reshape(1, -1)
+        
         # Obtener probabilidades del modelo
         probabilities = self.model.predict_proba(text_vectorized)[0]
         prob_toxic_raw = float(probabilities[1])
