@@ -82,23 +82,27 @@ class HateSpeechPredictor:
         prob_toxic_raw = float(probabilities[1])
         prob_not_toxic_raw = float(probabilities[0])
         
-        # Transformación: amplificar diferencias desde 0.5
-        # Si prob > 0.5, hacerla más alta
-        # Si prob < 0.5, hacerla más baja
+        # Transformación más agresiva: amplificar diferencias desde 0.5
+        # Factor de amplificación: 3.0 (hace diferencias más notables)
         if prob_toxic_raw > 0.5:
             # Amplificar hacia 1.0 (más tóxico)
-            prob_toxic = 0.5 + (prob_toxic_raw - 0.5) * 2.0  # Amplificar x2
-            prob_toxic = min(prob_toxic, 0.95)  # Limitar a 0.95 máximo
+            # Si raw=0.51 -> amplificado = 0.5 + 0.01*3 = 0.53
+            # Si raw=0.55 -> amplificado = 0.5 + 0.05*3 = 0.65
+            prob_toxic = 0.5 + (prob_toxic_raw - 0.5) * 3.0
+            prob_toxic = min(prob_toxic, 0.90)  # Limitar a 0.90 máximo
         else:
             # Amplificar hacia 0.0 (menos tóxico)
-            prob_toxic = 0.5 - (0.5 - prob_toxic_raw) * 2.0  # Amplificar x2
-            prob_toxic = max(prob_toxic, 0.05)  # Limitar a 0.05 mínimo
+            # Si raw=0.49 -> amplificado = 0.5 - 0.01*3 = 0.47
+            # Si raw=0.45 -> amplificado = 0.5 - 0.05*3 = 0.35
+            prob_toxic = 0.5 - (0.5 - prob_toxic_raw) * 3.0
+            prob_toxic = max(prob_toxic, 0.10)  # Limitar a 0.10 mínimo
         
         # Asegurar que sumen 1.0
         prob_not_toxic = 1.0 - prob_toxic
         
         # Recalcular predicción basada en probabilidades amplificadas
-        is_toxic = prob_toxic > 0.5
+        # Usar la predicción original del modelo como base
+        is_toxic = bool(prediction)
         
         # Resultado
         result = {
