@@ -481,6 +481,84 @@ async def get_prediction_stats():
         raise HTTPException(status_code=500, detail=f"Error al obtener estadísticas: {str(e)}")
 
 
+@app.get("/api/mlflow/experiments")
+async def get_mlflow_experiments():
+    """
+    Obtener lista de experimentos de MLflow.
+    
+    Returns:
+    - Lista de experimentos con sus runs y métricas
+    """
+    try:
+        import mlflow
+        from mlflow.tracking import MlflowClient
+        
+        # Configurar tracking URI
+        mlruns_path = backend_root / 'mlruns'
+        if not mlruns_path.exists():
+            return {
+                "experiments": [],
+                "message": "No se encontraron experimentos de MLflow. Ejecuta algunos entrenamientos primero."
+            }
+        
+        mlflow.set_tracking_uri(f"file://{mlruns_path.absolute()}")
+        client = MlflowClient()
+        
+        # Obtener todos los experimentos
+        experiments = client.search_experiments()
+        
+        experiments_data = []
+        for exp in experiments:
+            # Obtener runs del experimento
+            runs = client.search_runs(
+                experiment_ids=[exp.experiment_id],
+                max_results=50,
+                order_by=["metrics.f1_test DESC"]
+            )
+            
+            runs_data = []
+            for run in runs:
+                metrics = run.data.metrics
+                params = run.data.params
+                tags = run.data.tags
+                
+                runs_data.append({
+                    "run_id": run.info.run_id,
+                    "run_name": run.info.run_name or run.info.run_id,
+                    "status": run.info.status,
+                    "start_time": run.info.start_time,
+                    "end_time": run.info.end_time,
+                    "metrics": {
+                        "f1_test": metrics.get("f1_test", None),
+                        "f1_train": metrics.get("f1_train", None),
+                        "accuracy_test": metrics.get("accuracy_test", None),
+                        "precision_test": metrics.get("precision_test", None),
+                        "recall_test": metrics.get("recall_test", None),
+                        "overfitting": metrics.get("diff_f1", None),
+                    },
+                    "params": dict(params),
+                    "tags": dict(tags),
+                })
+            
+            experiments_data.append({
+                "experiment_id": exp.experiment_id,
+                "name": exp.name,
+                "artifact_location": exp.artifact_location,
+                "lifecycle_stage": exp.lifecycle_stage,
+                "runs_count": len(runs_data),
+                "runs": runs_data[:10],  # Limitar a 10 runs más recientes
+            })
+        
+        return {
+            "experiments": experiments_data,
+            "total_experiments": len(experiments_data),
+        }
+    except ImportError:
+        raise HTTPException(status_code=503, detail="MLflow no está instalado")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error al obtener experimentos de MLflow: {str(e)}")
+
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)

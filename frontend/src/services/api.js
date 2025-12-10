@@ -121,3 +121,16 @@ export const checkHealth = async () => {
   }
 };
 
+/**
+ * Obtener experimentos de MLflow
+ * @returns {Promise<Object>} Lista de experimentos con sus runs y métricas
+ */
+export const getMLflowExperiments = async () => {
+  try {
+    const response = await apiClient.get('/mlflow/experiments');
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.detail || 'Error al obtener experimentos de MLflow');
+  }
+};
+

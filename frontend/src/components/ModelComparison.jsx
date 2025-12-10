@@ -277,6 +277,93 @@ export function ModelComparison() {
         })}
       </motion.div>
 
+      {/* Tabla comparativa de todos los modelos */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.15 }}
+        className="bg-white rounded-2xl shadow-xl p-6 border border-slate-200 overflow-x-auto"
+      >
+        <div className="flex items-center gap-3 mb-6">
+          <div className="p-2 bg-indigo-100 rounded-lg">
+            <Gauge className="w-6 h-6 text-indigo-600" />
+          </div>
+          <div>
+            <h3 className="text-xl font-bold text-slate-900">Tabla Comparativa de Modelos</h3>
+            <p className="text-sm text-slate-600">Métricas completas de todos los modelos</p>
+          </div>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[800px]">
+            <thead>
+              <tr className="border-b-2 border-slate-200">
+                <th className="text-left py-3 px-4 font-bold text-slate-700">Modelo</th>
+                <th className="text-center py-3 px-4 font-bold text-slate-700">F1-Score</th>
+                <th className="text-center py-3 px-4 font-bold text-slate-700">Accuracy</th>
+                <th className="text-center py-3 px-4 font-bold text-slate-700">Precision</th>
+                <th className="text-center py-3 px-4 font-bold text-slate-700">Recall</th>
+                <th className="text-center py-3 px-4 font-bold text-slate-700">Overfitting</th>
+                <th className="text-center py-3 px-4 font-bold text-slate-700">Estado</th>
+              </tr>
+            </thead>
+            <tbody>
+              {allModels.map((model, idx) => (
+                <motion.tr
+                  key={idx}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.2 + idx * 0.05 }}
+                  className={`border-b border-slate-100 hover:bg-slate-50 transition-colors ${
+                    model.type === 'Augmented' ? 'bg-green-50 font-semibold' : ''
+                  }`}
+                >
+                  <td className="py-3 px-4">
+                    <div className="flex items-center gap-2">
+                      {model.type === 'Augmented' && <Award className="w-4 h-4 text-green-600" />}
+                      <span className={model.type === 'Augmented' ? 'text-green-700' : 'text-slate-900'}>
+                        {model.name}
+                      </span>
+                    </div>
+                  </td>
+                  <td className="text-center py-3 px-4">
+                    <span className={`font-semibold ${model.type === 'Augmented' ? 'text-green-600' : 'text-slate-900'}`}>
+                      {model.f1Test.toFixed(4)}
+                    </span>
+                  </td>
+                  <td className="text-center py-3 px-4 text-slate-700">{model.accuracy.toFixed(3)}</td>
+                  <td className="text-center py-3 px-4 text-slate-700">{model.precision.toFixed(3)}</td>
+                  <td className="text-center py-3 px-4 text-slate-700">{model.recall.toFixed(3)}</td>
+                  <td className="text-center py-3 px-4">
+                    <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                      model.overfitting < 5 ? 'bg-green-100 text-green-700' :
+                      model.overfitting < 10 ? 'bg-yellow-100 text-yellow-700' :
+                      'bg-red-100 text-red-700'
+                    }`}>
+                      {model.overfitting.toFixed(2)}%
+                    </span>
+                  </td>
+                  <td className="text-center py-3 px-4">
+                    {model.type === 'Augmented' ? (
+                      <span className="px-3 py-1 rounded-full text-xs font-bold bg-gradient-to-r from-green-500 to-emerald-600 text-white">
+                        En Producción
+                      </span>
+                    ) : model.status === 'optimal' ? (
+                      <span className="px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700">
+                        Óptimo
+                      </span>
+                    ) : (
+                      <span className="px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-600">
+                        {model.type}
+                      </span>
+                    )}
+                  </td>
+                </motion.tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </motion.div>
+
       {/* Gráfico principal: F1-Score comparativo */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
