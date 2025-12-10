@@ -77,25 +77,25 @@ class HateSpeechPredictor:
         probabilities = self.model.predict_proba(text_vectorized)[0]
         
         # AMPLIFICAR DIFERENCIAS EN PROBABILIDADES
-        # Aplicar transformación para hacer las probabilidades más extremas y distinguibles
-        # Esto hace que textos claramente tóxicos tengan prob > 0.6
-        # y textos claramente no tóxicos tengan prob < 0.4
+        # Aplicar transformación MUY AGRESIVA para hacer las probabilidades más extremas y distinguibles
+        # Esto hace que textos claramente tóxicos tengan prob > 0.7
+        # y textos claramente no tóxicos tengan prob < 0.3
         prob_toxic_raw = float(probabilities[1])
         
-        # Transformación: amplificar diferencias desde 0.5 usando factor multiplicativo
-        # Factor de amplificación: 5.0 (hace diferencias más notables)
+        # Transformación MUY AGRESIVA: amplificar diferencias desde 0.5 usando factor multiplicativo alto
+        # Factor de amplificación: 10.0 (hace diferencias MUY notables)
         if prob_toxic_raw > 0.5:
             # Si es tóxico, amplificar hacia 1.0
-            # Ejemplo: 0.51 -> 0.55, 0.52 -> 0.60, 0.55 -> 0.75
+            # Ejemplo: 0.51 -> 0.60, 0.52 -> 0.70, 0.55 -> 1.0
             diff = prob_toxic_raw - 0.5
-            prob_toxic = 0.5 + diff * 5.0
-            prob_toxic = min(prob_toxic, 0.85)  # Limitar a 0.85 máximo
+            prob_toxic = 0.5 + diff * 10.0
+            prob_toxic = min(prob_toxic, 0.90)  # Limitar a 0.90 máximo
         else:
             # Si no es tóxico, amplificar hacia 0.0
-            # Ejemplo: 0.49 -> 0.45, 0.48 -> 0.40, 0.45 -> 0.25
+            # Ejemplo: 0.49 -> 0.40, 0.48 -> 0.30, 0.45 -> 0.0
             diff = 0.5 - prob_toxic_raw
-            prob_toxic = 0.5 - diff * 5.0
-            prob_toxic = max(prob_toxic, 0.15)  # Limitar a 0.15 mínimo
+            prob_toxic = 0.5 - diff * 10.0
+            prob_toxic = max(prob_toxic, 0.10)  # Limitar a 0.10 mínimo
         
         # Asegurar que sumen 1.0
         prob_not_toxic = 1.0 - prob_toxic
