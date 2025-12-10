@@ -1,9 +1,6 @@
 import { Shield, AlertTriangle } from 'lucide-react';
 
-/**
- * Componente Hero - Header rojo con título y descripción
- * Basado en el diseño de Figma
- */
+
 export function Hero() {
   return (
     <div className="bg-red-600 text-white">
