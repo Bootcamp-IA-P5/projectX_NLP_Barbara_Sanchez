@@ -105,8 +105,9 @@ class HateSpeechPredictor:
         prob_not_toxic = 1.0 - prob_toxic
         
         # Recalcular predicción basada en probabilidades amplificadas
-        # Usar la predicción original del modelo como base
-        is_toxic = bool(prediction)
+        # Usar umbral de 0.5 en las probabilidades amplificadas
+        # Esto asegura que la decisión sea consistente con las probabilidades mostradas
+        is_toxic = prob_toxic > 0.5
         
         # Resultado
         result = {
