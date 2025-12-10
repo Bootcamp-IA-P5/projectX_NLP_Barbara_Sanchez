@@ -99,9 +99,17 @@ class HateSpeechPredictor:
         prob_toxic_raw = float(probabilities[1])
         
         # Umbral óptimo basado en análisis de balance precision-recall
-        # Este umbral (0.466) maximiza F1-score mientras reduce falsos positivos
-        # Resultados: Precision=0.645, Recall=0.870, F1=0.741, FP=44 (vs 85 con 0.46)
-        decision_threshold = 0.466
+        # Detectar si es modelo aumentado o original para usar umbral apropiado
+        model_path_str = str(self.model_path).lower()
+        if 'augmented' in model_path_str:
+            # Modelo aumentado: umbral 0.65 (mejor balance precision-recall)
+            # El modelo aumentado tiene mejor separación de clases pero necesita umbral más alto
+            # para evitar falsos positivos en comentarios positivos
+            decision_threshold = 0.65
+        else:
+            # Modelo original optimizado: umbral 0.47 (muy conservador)
+            # El modelo original tiene probabilidades muy cercanas, necesita umbral bajo
+            decision_threshold = 0.47
         
         # Decisión basada en probabilidad cruda (más conservadora)
         is_toxic_raw = prob_toxic_raw >= decision_threshold
@@ -175,23 +183,27 @@ def load_predictor(model_dir: Path = None) -> HateSpeechPredictor:
     """
     if model_dir is None:
         backend_root = Path(__file__).parent.parent.parent
-        # Intentar cargar modelo aumentado primero
-        augmented_dir = backend_root / 'models' / 'augmented'
         optimized_dir = backend_root / 'models' / 'optimized'
+        augmented_dir = backend_root / 'models' / 'augmented'
         
-        # Verificar si existe modelo aumentado
+        # Usar modelo aumentado por defecto (mejor separación de probabilidades)
+        # Con umbral 0.65 funciona mejor que el original
         augmented_model_path = augmented_dir / 'svm_augmented_model.pkl'
         augmented_vectorizer_path = augmented_dir / 'tfidf_vectorizer_augmented.pkl'
         
         if augmented_model_path.exists() and augmented_vectorizer_path.exists():
-            print("✅ Usando modelo aumentado (mejor rendimiento)")
+            print("✅ Usando modelo aumentado (mejor separación de clases)")
             model_path = augmented_model_path
             vectorizer_path = augmented_vectorizer_path
         else:
-            print("ℹ️  Modelo aumentado no encontrado, usando modelo optimizado original")
-            model_dir = optimized_dir
-            model_path = model_dir / 'best_optimized_model.pkl'
-            vectorizer_path = model_dir.parent / 'tfidf_vectorizer.pkl'
+            # Fallback: usar modelo original si el aumentado no existe
+            model_path = optimized_dir / 'best_optimized_model.pkl'
+            vectorizer_path = optimized_dir.parent / 'tfidf_vectorizer.pkl'
+            
+            if not model_path.exists() or not vectorizer_path.exists():
+                raise FileNotFoundError(f"Modelo no encontrado en {augmented_model_path} ni en {model_path}")
+            else:
+                print("ℹ️  Modelo aumentado no encontrado, usando modelo optimizado original")
     else:
         # Si se especifica un directorio, usar ese
         model_path = model_dir / 'best_optimized_model.pkl'
