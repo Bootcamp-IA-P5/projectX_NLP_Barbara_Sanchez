@@ -1,0 +1,41 @@
+# Render Blueprint - Despliega Backend y Frontend juntos
+# Usa este archivo para desplegar ambos servicios desde un solo lugar
+
+services:
+  # Backend Service
+  - type: web
+    name: hate-speech-api
+    env: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    plan: free
+    region: oregon
+    branch: develop
+    envVars:
+      - key: PYTHONUNBUFFERED
+        value: 1
+      - key: FRONTEND_URL
+        sync: false  # Se configurará manualmente después de desplegar frontend
+    healthCheckPath: /health
+    autoDeploy: true
+
+  # Frontend Service (Static Site - Recomendado)
+  - type: static
+    name: hate-speech-frontend
+    buildCommand: cd frontend && npm install && npm run build
+    publishPath: frontend/dist
+    branch: develop
+    envVars:
+      - key: VITE_API_URL
+        sync: false  # Se configurará manualmente con la URL del backend
+    headers:
+      - path: /*
+        name: X-Content-Type-Options
+        value: nosniff
+      - path: /*
+        name: X-Frame-Options
+        value: DENY
+      - path: /*
+        name: X-XSS-Protection
+        value: 1; mode=block
+
