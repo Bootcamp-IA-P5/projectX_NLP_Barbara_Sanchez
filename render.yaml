@@ -19,23 +19,18 @@ services:
     healthCheckPath: /health
     autoDeploy: true
 
-  # Frontend Service (Static Site - Recomendado)
-  - type: static
+  # Frontend Service (Web Service con Docker)
+  - type: web
     name: hate-speech-frontend
-    buildCommand: cd frontend && npm install && npm run build
-    publishPath: frontend/dist
+    env: docker
+    dockerfilePath: ./frontend/Dockerfile
+    dockerContext: ./frontend
+    plan: free
+    region: oregon
     branch: develop
     envVars:
       - key: VITE_API_URL
         sync: false  # Se configurará manualmente con la URL del backend
-    headers:
-      - path: /*
-        name: X-Content-Type-Options
-        value: nosniff
-      - path: /*
-        name: X-Frame-Options
-        value: DENY
-      - path: /*
-        name: X-XSS-Protection
-        value: 1; mode=block
+    healthCheckPath: /
+    autoDeploy: true
 
