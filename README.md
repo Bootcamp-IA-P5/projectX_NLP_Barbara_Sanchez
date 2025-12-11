@@ -375,21 +375,30 @@ Accede a la documentación interactiva en: `http://localhost:8000/docs`
 
 ### Modelo Final: SVM Optimizado con Data Augmentation
 
-**Métricas**:
-- **F1-Score (Test)**: Mejorado con data augmentation ✅
-- **Overfitting**: < 5% ✅
-- **Dataset**: Aumentado de 1,000 a ~1,900 ejemplos usando sinónimos
+**⚠️ Metodología Corregida (sin data leakage)**:
+- Split train/test **ANTES** de augmentation (80/20)
+- Solo se aumenta el conjunto de **TRAIN** (800 → 1,528 ejemplos)
+- El conjunto de **TEST** se mantiene intacto (200 ejemplos originales)
+- Total final: 1,728 ejemplos (1,528 train aumentado + 200 test original)
+
+**Métricas** (evaluadas con test independiente):
+- **F1-Score (Test)**: 0.6776 (similar al original, más realista)
+- **Accuracy**: 0.7050 ✅ (+21.55% vs original)
+- **Precision**: 0.6813 ✅ (+30.34% vs original)
+- **Recall**: 0.6739 (trade-off por mejor precision)
+- **Overfitting**: 22.59% ⚠️ (aumenta, requiere control)
 
 **Parámetros**:
 - C: 0.056
 - Kernel: linear
 - Umbral de decisión: 0.466
 - Técnica de augmentation: Reemplazo por sinónimos (WordNet)
+- Factor de aumento: 1.0 (duplicar dataset de train)
 
 **Ubicación**: `backend/models/augmented/svm_augmented_model.pkl`
 **Fallback**: `backend/models/optimized/best_optimized_model.pkl` (si el aumentado no está disponible)
 
-**Nota**: La API carga automáticamente el modelo aumentado si está disponible, mejorando el rendimiento. Si no está disponible, usa el modelo optimizado original.
+**Nota**: La API carga automáticamente el modelo aumentado si está disponible. Las métricas son más realistas al evitar data leakage (test independiente sin aumentar).
 
 ### Modelos Evaluados
 

@@ -249,6 +249,50 @@ class DatabaseManager:
             }
         finally:
             session.close()
+    
+    def get_recent_statistics(self, limit: int = 100) -> Dict:
+        """
+        Obtener estadísticas de las predicciones más recientes.
+        
+        Args:
+            limit: Número de predicciones recientes a considerar
+            
+        Returns:
+            Diccionario con estadísticas recientes
+        """
+        session = self.get_session()
+        try:
+            # Obtener predicciones más recientes
+            recent_predictions = session.query(Prediction).order_by(
+                Prediction.created_at.desc()
+            ).limit(limit).all()
+            
+            if not recent_predictions:
+                return {
+                    'total_predictions': 0,
+                    'toxic_count': 0,
+                    'not_toxic_count': 0,
+                    'toxic_percentage': 0,
+                    'not_toxic_percentage': 0,
+                    'average_confidence': 0.0
+                }
+            
+            total = len(recent_predictions)
+            toxic = sum(1 for p in recent_predictions if p.is_toxic)
+            not_toxic = total - toxic
+            
+            avg_confidence = sum(p.confidence for p in recent_predictions) / total if total > 0 else 0.0
+            
+            return {
+                'total_predictions': total,
+                'toxic_count': toxic,
+                'not_toxic_count': not_toxic,
+                'toxic_percentage': (toxic / total * 100) if total > 0 else 0,
+                'not_toxic_percentage': (not_toxic / total * 100) if total > 0 else 0,
+                'average_confidence': float(avg_confidence)
+            }
+        finally:
+            session.close()
 
 
 # Instancia global del gestor de BD

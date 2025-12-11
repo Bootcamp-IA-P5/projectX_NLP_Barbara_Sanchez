@@ -7,6 +7,7 @@ import { ModelInfo } from './components/ModelInfo';
 import { ModelComparison } from './components/ModelComparison';
 import { Statistics } from './components/Statistics';
 import { MLflowMetrics } from './components/MLflowMetrics';
+import { ModelMonitoring } from './components/ModelMonitoring';
 
 /**
  * Formato de resultado del análisis
@@ -25,7 +26,7 @@ import { MLflowMetrics } from './components/MLflowMetrics';
 
 function App() {
   const [results, setResults] = useState([]);
-  const [activeSection, setActiveSection] = useState('analyzer'); // 'analyzer' | 'model' | 'comparison' | 'stats' | 'mlflow'
+  const [activeSection, setActiveSection] = useState('analyzer'); // 'analyzer' | 'model' | 'comparison' | 'stats' | 'mlflow' | 'monitoring'
 
   const handleAnalysis = (newResults) => {
     setResults(newResults);
@@ -87,6 +88,16 @@ function App() {
             }`}
           >
             MLflow
+          </button>
+          <button
+            onClick={() => setActiveSection('monitoring')}
+            className={`px-6 py-3 transition-all whitespace-nowrap ${
+              activeSection === 'monitoring'
+                ? 'border-b-2 border-red-500 text-red-600'
+                : 'text-slate-600 hover:text-slate-900'
+            }`}
+          >
+            Monitoreo
           </button>
         </div>
 
@@ -151,6 +162,18 @@ function App() {
               transition={{ duration: 0.3 }}
             >
               <MLflowMetrics />
+            </motion.div>
+          )}
+
+          {activeSection === 'monitoring' && (
+            <motion.div
+              key="monitoring"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.3 }}
+            >
+              <ModelMonitoring />
             </motion.div>
           )}
         </AnimatePresence>

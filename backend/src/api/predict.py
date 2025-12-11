@@ -102,10 +102,10 @@ class HateSpeechPredictor:
         # Detectar si es modelo aumentado o original para usar umbral apropiado
         model_path_str = str(self.model_path).lower()
         if 'augmented' in model_path_str:
-            # Modelo aumentado: umbral 0.65 (mejor balance precision-recall)
-            # El modelo aumentado tiene mejor separación de clases pero necesita umbral más alto
-            # para evitar falsos positivos en comentarios positivos
-            decision_threshold = 0.65
+            # Modelo aumentado: umbral 0.50 (balance entre detección y precisión)
+            # El umbral de 0.65 era demasiado alto y causaba que todo se clasificara como no tóxico
+            # Con 0.50 detectamos más casos tóxicos manteniendo buena precisión
+            decision_threshold = 0.50
         else:
             # Modelo original optimizado: umbral 0.47 (muy conservador)
             # El modelo original tiene probabilidades muy cercanas, necesita umbral bajo

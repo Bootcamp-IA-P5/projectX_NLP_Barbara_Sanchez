@@ -626,11 +626,11 @@ export function ModelInfo() {
             </h4>
             <div className="space-y-3 max-h-[600px] overflow-y-auto pr-2">
               {[
-                { metric: 'F1-Score', original: '0.6866', augmented: '0.7749', improvement: '+12.87%', color: 'green', bg: 'from-green-100 to-emerald-100' },
-                { metric: 'Accuracy', original: '0.5800', augmented: '0.7948', improvement: '+37.04%', color: 'green', bg: 'from-green-100 to-emerald-100' },
-                { metric: 'Precision', original: '0.5227', augmented: '0.8047', improvement: '+53.95%', color: 'green', bg: 'from-green-100 to-emerald-100' },
-                { metric: 'Recall', original: '1.0000', augmented: '0.7473', improvement: '-25.27%', color: 'orange', bg: 'from-orange-100 to-amber-100' },
-                { metric: 'Overfitting', original: '2.54%', augmented: '12.19%', improvement: '+9.65%', color: 'orange', bg: 'from-orange-100 to-amber-100' },
+                { metric: 'F1-Score', original: '0.6866', augmented: '0.6776', improvement: '-1.31%', color: 'orange', bg: 'from-orange-100 to-amber-100', note: 'Similar al original (más realista)' },
+                { metric: 'Accuracy', original: '0.5800', augmented: '0.7050', improvement: '+21.55%', color: 'green', bg: 'from-green-100 to-emerald-100' },
+                { metric: 'Precision', original: '0.5227', augmented: '0.6813', improvement: '+30.34%', color: 'green', bg: 'from-green-100 to-emerald-100' },
+                { metric: 'Recall', original: '1.0000', augmented: '0.6739', improvement: '-32.61%', color: 'red', bg: 'from-red-100 to-rose-100', note: 'Trade-off por mejor precision' },
+                { metric: 'Overfitting', original: '2.54%', augmented: '22.59%', improvement: '+20.05%', color: 'red', bg: 'from-red-100 to-rose-100', note: 'Requiere control adicional' },
               ].map((item, idx) => (
                 <motion.div 
                   key={idx} 

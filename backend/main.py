@@ -481,6 +481,70 @@ async def get_prediction_stats():
         raise HTTPException(status_code=500, detail=f"Error al obtener estadísticas: {str(e)}")
 
 
+@app.get("/predictions/monitor", tags=["Database"])
+async def get_model_monitoring(recent_limit: int = 100):
+    """
+    Monitoreo del modelo: compara estadísticas recientes vs históricas.
+    
+    Detecta degradación del modelo comparando:
+    - Confianza promedio reciente vs histórica
+    - Si la confianza baja > 10%, se considera alerta
+    
+    - **recent_limit**: Número de predicciones recientes a considerar (default: 100)
+    
+    Returns:
+    - Comparación entre estadísticas recientes e históricas
+    - Alertas si hay degradación detectada
+    """
+    if not db_manager:
+        raise HTTPException(status_code=503, detail="Base de datos no disponible")
+    
+    try:
+        # Obtener estadísticas históricas (todas las predicciones)
+        historical_stats = db_manager.get_statistics()
+        
+        # Obtener estadísticas recientes
+        recent_stats = db_manager.get_recent_statistics(limit=recent_limit)
+        
+        # Calcular degradación
+        historical_confidence = historical_stats.get('average_confidence', 0.0)
+        recent_confidence = recent_stats.get('average_confidence', 0.0)
+        
+        confidence_drop = historical_confidence - recent_confidence
+        confidence_drop_percentage = (confidence_drop / historical_confidence * 100) if historical_confidence > 0 else 0
+        
+        # Determinar estado
+        status = "healthy"
+        alert = None
+        
+        if historical_stats['total_predictions'] < recent_limit:
+            # No hay suficientes datos históricos
+            status = "insufficient_data"
+            alert = "No hay suficientes datos históricos para comparar"
+        elif confidence_drop_percentage > 10:
+            # Degradación significativa
+            status = "degraded"
+            alert = f"⚠️ Degradación detectada: Confianza promedio bajó {confidence_drop_percentage:.1f}% (de {historical_confidence:.3f} a {recent_confidence:.3f})"
+        elif confidence_drop_percentage > 5:
+            # Degradación moderada
+            status = "warning"
+            alert = f"⚠️ Atención: Confianza promedio bajó {confidence_drop_percentage:.1f}%"
+        
+        return {
+            "status": status,
+            "alert": alert,
+            "historical": historical_stats,
+            "recent": recent_stats,
+            "comparison": {
+                "confidence_drop": float(confidence_drop),
+                "confidence_drop_percentage": float(confidence_drop_percentage),
+                "recent_limit": recent_limit
+            }
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error al obtener monitoreo: {str(e)}")
+
+
 @app.get("/api/mlflow/experiments")
 async def get_mlflow_experiments():
     """

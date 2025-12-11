@@ -134,3 +134,19 @@ export const getMLflowExperiments = async () => {
   }
 };
 
+/**
+ * Obtener monitoreo del modelo (comparación reciente vs histórico)
+ * @param {number} recentLimit - Número de predicciones recientes a considerar (default: 100)
+ * @returns {Promise<Object>} Datos de monitoreo con alertas
+ */
+export const getModelMonitoring = async (recentLimit = 100) => {
+  try {
+    const response = await apiClient.get('/predictions/monitor', {
+      params: { recent_limit: recentLimit }
+    });
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.detail || 'Error al obtener monitoreo del modelo');
+  }
+};
+
